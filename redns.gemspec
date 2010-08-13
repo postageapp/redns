@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["tadman"]
   s.date = %q{2010-08-13}
-  s.description = %q{TODO: longer description of your gem}
+  s.description = %q{ReDNS is a pure Ruby DNS library with drivers for reactor-model engines such as EventMachine}
   s.email = %q{github@tadman.ca}
   s.extra_rdoc_files = [
     "README.rdoc"
@@ -34,6 +34,7 @@ Gem::Specification.new do |s|
      "lib/redns/record/soa.rb",
      "lib/redns/resource.rb",
      "lib/redns/support.rb",
+     "redns.gemspec",
      "test/helper.rb",
      "test/test_redns.rb",
      "test/test_redns_address.rb",
@@ -49,7 +50,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
-  s.summary = %q{TODO: one-line summary of your gem}
+  s.summary = %q{Ruby Reactor-Ready DNS Library}
   s.test_files = [
     "test/helper.rb",
      "test/test_redns.rb",
@@ -68,12 +69,9 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<thoughtbot-shoulda>, [">= 0"])
     else
-      s.add_dependency(%q<thoughtbot-shoulda>, [">= 0"])
     end
   else
-    s.add_dependency(%q<thoughtbot-shoulda>, [">= 0"])
   end
 end
 

@@ -5,13 +5,11 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "redns"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{Ruby Reactor-Ready DNS Library}
+    gem.description = %Q{ReDNS is a pure Ruby DNS library with drivers for reactor-model engines such as EventMachine}
     gem.email = "github@tadman.ca"
     gem.homepage = "http://github.com/tadman/redns"
-    gem.authors = ["tadman"]
-    gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+    gem.authors = %w[ tadman ]
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
