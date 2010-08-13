@@ -14,6 +14,32 @@ module ReDNS::Support
 		  c.to_i
 		end.pack("C*")
 	end
+
+	def io_nonblock?(io)
+		(io.fcntl(Fcntl::F_GETFL) & File::NONBLOCK) != 0
+	end
+
+	def io_set_nonblock(io, nb = true)
+		flags = io.fcntl(Fcntl::F_GETFL)
+		
+		if (nb)
+			flags |= File::NONBLOCK
+		else
+			flags &= ~File::NONBLOCK
+		end
+		
+		io.fcntl(Fcntl::F_SETFL, flags)
+	end
+
+	def io_nonblock(nb = true, &block)
+	  flag = io_nonblock?(io)
+	  
+		io_set_nonblock(io, nb)
+		
+		yield(block)
+	ensure
+		io_set_nonblock(io, flag)
+	end
 	
 	extend(self)
 end

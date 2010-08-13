@@ -31,7 +31,7 @@ class ReDNS::Message < ReDNS::Fragment
   # == Instance Methods =====================================================
   
 	def increment_id!
-	  @attributes[:id] += 1
+	  self.id += 1
 	end
 
 	def response?
@@ -83,9 +83,9 @@ class ReDNS::Message < ReDNS::Fragment
     			(ReDNS::OPCODE[self.opcode] || ReDNS::OPCODE[:unknown]) << 12 |
     			(self.authorative? ? 0x0400 : 0) |
     			(self.truncated? ? 0x0200 : 0) |
-    			(self.ecursion_desired? ? 0x0100 : 0) |
+    			(self.recursion_desired? ? 0x0100 : 0) |
     			(self.recursion_available? ? 0x0080 : 0) |
-    			(ReDNS::RCODE[self.reponse_code] || ReDNS::RCODE[:noerror])
+    			(ReDNS::RCODE[self.response_code] || ReDNS::RCODE[:noerror])
   			),
   		  self.questions.length,
   			self.answers.length,
@@ -96,7 +96,7 @@ class ReDNS::Message < ReDNS::Fragment
   	)
 
     [ :questions, :answers, :nameservers, :additional_records ].each do |section|
-      @attributes[:group].each do |part|
+      @attributes[section] and @attributes[section].each do |part|
         part.serialize(buffer)
       end
     end
@@ -110,14 +110,13 @@ class ReDNS::Message < ReDNS::Fragment
 		self.id = data.shift
 
 		flags = data.shift
-		self.query = flags & 0x8000
-		self.opcode = (flags & 0x7800) >> 12
-		self.authorative = flags & 0x0400
-		self.truncated = flags & 0x0200
-		self.recursion_desired = flags & 0x0100
-		
-		self.recursion_available = flags & 0x0080
-		self.response_code = flags & 0x000F
+		self.query = (flags & 0x8000 == 0)
+		self.opcode = ReDNS::OPCODE_LABEL[(flags & 0x7800) >> 12]
+		self.authorative = (flags & 0x0400 != 0)
+		self.truncated = (flags & 0x0200 != 0)
+		self.recursion_desired = (flags & 0x0100 != 0)
+		self.recursion_available = (flags & 0x0080 != 0)
+		self.response_code = ReDNS::RCODE_LABEL[flags & 0x000F]
 		
 		SECTIONS.each do |section|
 		  @attributes[:"#{section}_count"] = data.shift
@@ -128,7 +127,7 @@ class ReDNS::Message < ReDNS::Fragment
 		  
 		  decode_class =
   		  case (section)
-  	    when :question
+  	    when :questions
   	      ReDNS::Question
 	      else
 	        ReDNS::Resource

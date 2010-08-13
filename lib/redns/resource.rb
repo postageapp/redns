@@ -55,7 +55,7 @@ class ReDNS::Resource < ReDNS::Fragment
 	
 	def deserialize(buffer)
 		self.name = ReDNS::Name.new(buffer)
-		
+
 		raw = buffer.unpack("nnNn")
 		
 		self.rtype = ReDNS::RR_TYPE_LABEL[raw.shift]

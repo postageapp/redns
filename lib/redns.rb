@@ -69,6 +69,7 @@ module ReDNS
   autoload(:Name, 'redns/name')
   autoload(:Question, 'redns/question')
   autoload(:Record, 'redns/record')
+  autoload(:Resolver, 'redns/resolver')
   autoload(:Resource, 'redns/resource')
   autoload(:Support, 'redns/support')
 
