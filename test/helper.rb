@@ -1,9 +1,12 @@
 require 'rubygems'
 require 'test/unit'
-require 'shoulda'
 
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-$LOAD_PATH.unshift(File.dirname(__FILE__))
+[ %w[ .. lib ], %w[ . ] ].each do |path|
+  $LOAD_PATH.unshift(
+    File.expand_path(File.join(*path), File.dirname(__FILE__))
+  )
+end
+
 require 'redns'
 
 class Test::Unit::TestCase
