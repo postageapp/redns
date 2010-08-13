@@ -25,7 +25,7 @@ class TestReReDNSResolver < Test::Unit::TestCase
   			q.name = "example.com"
   		end
 
-  		assert r
+  		assert r, "ReDNS::Resolver#query did not produce a reply"
 
   		assert_equal 1, r.questions.size
   		assert_equal 1, r.answers.size
@@ -69,28 +69,40 @@ class TestReReDNSResolver < Test::Unit::TestCase
   		assert rlist
 
   		assert_equal 4, rlist.length
+  		
+  		assert_equal addrs.sort, rlist.keys.sort
+  		
   		assert rlist[addrs[0]]
-  		assert_equal 'sand1-ecf-ether.gw.utoronto.ca.', rlist[addrs[0]].answers[0].rdata.to_s
+  		assert_equal 'sf-ecf.gw.utoronto.ca.', rlist[addrs[0]].answers[0].rdata.to_s
+
   		assert rlist[addrs[1]]
   		assert_equal 'fs.ecf.utoronto.ca.', rlist[addrs[1]].answers[0].rdata.to_s
+
   		assert rlist[addrs[2]]
   		assert_equal 'ecf-if.gw.utoronto.ca.', rlist[addrs[2]].answers[0].rdata.to_s
+
   		assert rlist[addrs[3]]
   		assert_equal 'ecf-8-hub.ecf.utoronto.ca.', rlist[addrs[3]].answers[0].rdata.to_s
   	end
 
   	def test_reverse_addresses
-  		addrs = %w{ 128.100.8.1 128.100.8.2 128.100.8.3 128.100.8.4 }
-
+      addrs = %w[
+  		  128.100.8.1
+  		  128.100.8.2
+  		  128.100.8.3
+  		  128.100.8.4
+  		]
+  		
   		res = ReDNS::Resolver.new
 
   		rlist = res.reverse_addresses(addrs)
 
   		assert rlist
-
-  		assert_equal 4, rlist.length
+  		
+  		assert_equal addrs.length, rlist.length
+  		
   		assert rlist[addrs[0]]
-  		assert_equal 'sand1-ecf-ether.gw.utoronto.ca.', rlist[addrs[0]]
+  		assert_equal 'sf-ecf.gw.utoronto.ca.', rlist[addrs[0]]
   		assert rlist[addrs[1]]
   		assert_equal 'fs.ecf.utoronto.ca.', rlist[addrs[1]]
   		assert rlist[addrs[2]]

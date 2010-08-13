@@ -76,10 +76,10 @@ class ReDNS::Resolver
 			send_message(message)
 		end
 		
-		wait_for_responses do |r, addr|
-			results[r.questions[0].name] = r
+		wait_for_responses do |response, addr|
+			results[response.questions[0].name.to_s] = response
 
-			ids.delete(r.id)
+			ids.delete(response.id)
 				
 			return results if (ids.empty?)
 		end
@@ -123,19 +123,15 @@ class ReDNS::Resolver
 			h
 		end
 		
-		list = bulk_query(:ptr, ips.collect { |ip| ReDNS::Support.addr_to_arpa(ip) })
+		list = bulk_query(:ptr, map.keys)
 		
-		results = { }
-		
-		# FIX: This is a little weak here, where the arpa mapping should be done in ptr_for
-		
-		list.values.each do |r|
-			ip = map[r.questions[0].name]
-			
-			results[ip] = (r.answers[0] and r.answers[0].rdata.to_s) if (ip)
+		list.values.inject({ }) do |h, r|
+			if (ip = map[r.questions[0].name.to_s])
+			  h[ip] = (r.answers[0] and r.answers[0].rdata.to_s)
+		  end
+		  
+			h
 		end
-		
-		results
 	end
 	
 	def servers
@@ -202,7 +198,7 @@ class ReDNS::Resolver
 				ready[0].each do |socket|
 					data = socket.recvfrom(1524)
 			
-					r = ReDNS::Message.new(data[0])
+					r = ReDNS::Message.new(ReDNS::Buffer.new(data[0]))
 					
 					yield(r, data[1]) if (block)
 	
