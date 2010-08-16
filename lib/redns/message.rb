@@ -129,6 +129,8 @@ class ReDNS::Message < ReDNS::Fragment
 	end
 
 	def deserialize(buffer)
+	  return unless (buffer)
+	  
 		data = buffer.unpack("nnnnnn")
 		
 		self.id = data.shift

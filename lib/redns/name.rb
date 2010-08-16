@@ -67,8 +67,12 @@ class ReDNS::Name < ReDNS::Fragment
       elsif (c == 0)
         break
       else
-        name << buffer.read(c)
-        name << '.'
+        if (read = buffer.read(c))
+          name << read
+          name << '.'
+        else
+          break
+        end
       end
     end
     
