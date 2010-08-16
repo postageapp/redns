@@ -40,7 +40,7 @@ class ReDNS::Buffer < String
   def unpack(format)
     return [ ] if (@size <= 0)
     
-    raise ReDNS::Exception::BufferUnderrun if (@offset > total_length)
+    return if (@offset > total_length)
 
     data = to_s.unpack(format)
     advance(data.pack(format).length)
@@ -52,7 +52,7 @@ class ReDNS::Buffer < String
   end
   
   def read(chars = 1)
-    raise ReDNS::Exception::BufferUnderrun if (@offset + chars > total_length)
+    return if (@offset + chars > total_length)
 
     result = to_str[@offset, chars]
     advance(chars)

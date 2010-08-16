@@ -11,14 +11,7 @@ class TestReDNSBuffer < Test::Unit::TestCase
     assert buffer.empty?
     assert !buffer.inspect.empty?
     
-    rescued = nil
-    
-    begin
-      assert '', buffer.read
-    rescue Object => rescued
-    end
-    
-    assert_equal ReDNS::Exception::BufferUnderrun, rescued.class
+    assert_equal nil, buffer.read
   end
     
   def test_simple_duplicate
