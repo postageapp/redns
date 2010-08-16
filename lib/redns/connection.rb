@@ -3,6 +3,12 @@ require 'socket'
 class ReDNS::Connection < EventMachine::Connection
   # == Constants ============================================================
   
+  DEFAULT_TIMEOUT = 5
+  
+  # == Properties ===========================================================
+  
+  attr_accessor :timeout
+
   # == Extensions ===========================================================
 
   include EventMachine::Deferrable
@@ -10,11 +16,15 @@ class ReDNS::Connection < EventMachine::Connection
   # == Class Methods ========================================================
 
   def self.instance
-    EventMachine.open_datagram_socket(
+    connection = EventMachine.open_datagram_socket(
       ReDNS::Support.bind_all_addr,
       0,
       self
     )
+    
+    yield(connection) if (block_given?)
+    
+    connection
   end
 
   # == Instance Methods =====================================================
@@ -26,6 +36,23 @@ class ReDNS::Connection < EventMachine::Connection
     
     # Callback tracking is done by matching response IDs in a lookup table
     @callback = { }
+    
+    EventMachine.add_periodic_timer(1) do
+      check_for_timeouts!
+    end
+  end
+  
+  def random_nameserver
+    nameservers[rand(nameservers.length)]
+  end
+  
+  def nameservers
+    @nameservers ||= ReDNS::Support.default_nameservers
+  end
+  
+  def nameservers=(*list)
+    @nameservers = list.flatten.compact
+    @nameservers = nil if (list.empty?)
   end
   
   def port
@@ -35,8 +62,8 @@ class ReDNS::Connection < EventMachine::Connection
   def receive_data(data)
     message = ReDNS::Message.new(ReDNS::Buffer.new(data))
     
-    if (callback = @callback[message.id])
-      callback.yield(message.answers.collect { |a| a.rdata.to_s })
+    if (callback = @callback.delete(message.id))
+      callback[:callback].call(message.answers.collect { |a| a.rdata.to_s })
     end
   end
   
@@ -47,12 +74,15 @@ class ReDNS::Connection < EventMachine::Connection
 
     result = send_datagram(
       message.serialize.to_s,
-      ReDNS::Support.default_resolver_address,
+      random_nameserver,
       ReDNS::Support.dns_port
     )
 
     if (result > 0)
-      @callback[@sequence] = callback
+      @callback[@sequence] = {
+        :callback => callback,
+        :at => Time.now
+      }
     else
       callback.call(nil)
     end
@@ -61,5 +91,23 @@ class ReDNS::Connection < EventMachine::Connection
   end
   
   def unbind
+  end
+  
+  def check_for_timeouts!
+    timeout_at = Time.now - (@timeout || DEFAULT_TIMEOUT)
+    
+    @callback.keys.each do |k|
+      params = @callback[k]
+
+      if (params and params[:at] < timeout_at)
+        params[:callback].call(nil)
+        @callback.delete(k)
+      end
+    end
+  end
+  
+  def timeout=(value)
+    @timeout = value.to_i
+    @timeout = DEFAULT_TIMEOUT if (@timeout == 0)
   end
 end

@@ -52,6 +52,10 @@ module ReDNS::Support
   def dns_port
     53
   end
+
+  def default_nameservers
+    ReDNS::Resolver.servers
+  end
   
   def default_resolver_address
     ReDNS::Resolver.servers.first
