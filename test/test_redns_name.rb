@@ -9,11 +9,19 @@ class TestReDNSName < Test::Unit::TestCase
     
     assert name.empty?
   end
-
+  
   def test_string_initializer
-    name = ReDNS::Name.new('example.net')
+    name = ReDNS::Name.new('example.net'.freeze)
     
     assert_equal 'example.net.', name.to_s
+
+    assert !name.empty?
+  end
+
+  def test_string_address_initializer
+    name = ReDNS::Name.new('127.0.0.1'.freeze)
+    
+    assert_equal '127.0.0.1', name.to_s
 
     assert !name.empty?
   end

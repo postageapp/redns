@@ -64,6 +64,7 @@ module ReDNS
 
   autoload(:Address, 'redns/address')
   autoload(:Buffer, 'redns/buffer')
+  autoload(:Connection, 'redns/connection')
   autoload(:Fragment, 'redns/fragment')
   autoload(:Message, 'redns/message')
   autoload(:Name, 'redns/name')

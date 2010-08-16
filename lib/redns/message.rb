@@ -12,7 +12,7 @@ class ReDNS::Message < ReDNS::Fragment
 	attribute :opcode, :default => :query
 	attribute :authorative, :boolean => true, :default => false
 	attribute :truncated, :boolean => true, :default => false
-	attribute :recursion_desired, :boolean => true, :default => false
+	attribute :recursion_desired, :boolean => true, :default => true
 	attribute :recursion_available, :boolean => true, :default => false
 	attribute :response_code, :default => :noerror
 	
@@ -27,6 +27,23 @@ class ReDNS::Message < ReDNS::Fragment
 	attribute :additional_records, :default => lambda { [ ] }
 
   # == Class Methods ========================================================
+  
+  def self.question(name, qtype = nil)
+    qtype ||= ReDNS::Support.is_ip?(name) ? :ptr : :a
+    
+    message = new(
+      :questions => [
+        ReDNS::Question.new(
+          :name => name,
+          :qtype => qtype
+        )
+      ]
+    )
+    
+    yield(message) if (block_given?)
+    
+    message
+  end
 
   # == Instance Methods =====================================================
   

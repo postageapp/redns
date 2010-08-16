@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{redns}
-  s.version = "0.0.0"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["tadman"]
-  s.date = %q{2010-08-13}
+  s.date = %q{2010-08-16}
   s.description = %q{ReDNS is a pure Ruby DNS library with drivers for reactor-model engines such as EventMachine}
   s.email = %q{github@tadman.ca}
   s.extra_rdoc_files = [
@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
      "lib/redns.rb",
      "lib/redns/address.rb",
      "lib/redns/buffer.rb",
+     "lib/redns/connection.rb",
      "lib/redns/fragment.rb",
      "lib/redns/message.rb",
      "lib/redns/name.rb",
@@ -32,6 +33,7 @@ Gem::Specification.new do |s|
      "lib/redns/record/mx.rb",
      "lib/redns/record/null.rb",
      "lib/redns/record/soa.rb",
+     "lib/redns/resolver.rb",
      "lib/redns/resource.rb",
      "lib/redns/support.rb",
      "redns.gemspec",
@@ -39,10 +41,12 @@ Gem::Specification.new do |s|
      "test/test_redns.rb",
      "test/test_redns_address.rb",
      "test/test_redns_buffer.rb",
+     "test/test_redns_connection.rb",
      "test/test_redns_fragment.rb",
      "test/test_redns_message.rb",
      "test/test_redns_name.rb",
      "test/test_redns_question.rb",
+     "test/test_redns_resolver.rb",
      "test/test_redns_resource.rb",
      "test/test_redns_support.rb"
   ]
@@ -56,10 +60,12 @@ Gem::Specification.new do |s|
      "test/test_redns.rb",
      "test/test_redns_address.rb",
      "test/test_redns_buffer.rb",
+     "test/test_redns_connection.rb",
      "test/test_redns_fragment.rb",
      "test/test_redns_message.rb",
      "test/test_redns_name.rb",
      "test/test_redns_question.rb",
+     "test/test_redns_resolver.rb",
      "test/test_redns_resource.rb",
      "test/test_redns_support.rb"
   ]

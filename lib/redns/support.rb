@@ -41,5 +41,21 @@ module ReDNS::Support
 		io_set_nonblock(io, flag)
 	end
 	
+	def bind_all_addr
+    '0.0.0.0'
+  end
+
+  def is_ip?(address)
+    address and address.match(/^\d+(\.\d+)+$/)
+  end
+  
+  def dns_port
+    53
+  end
+  
+  def default_resolver_address
+    ReDNS::Resolver.servers.first
+  end
+	
 	extend(self)
 end

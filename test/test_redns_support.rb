@@ -13,4 +13,9 @@ class TestReDNSSupport < Test::Unit::TestCase
     assert_equal '1.2.3.4', inet_ntoa(inet_aton('1.2.3.4'))
     assert_equal '255.255.255.255', inet_ntoa(inet_aton('255.255.255.255'))
   end
+  
+  def test_default_resolver_address
+    assert ReDNS::Support.default_resolver_address
+    assert !ReDNS::Support.default_resolver_address.empty?
+  end
 end

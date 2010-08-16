@@ -13,7 +13,10 @@ class ReDNS::Name < ReDNS::Fragment
       super(contents)
     when String
       super(:name => contents)
-      self.name << '.' unless (self.name.match(/\.$/))
+      
+      unless (ReDNS::Support.is_ip?(name) or self.name.match(/\.$/))
+        self.name += '.'
+      end
     else
       super(contents)
     end

@@ -17,7 +17,7 @@ class TestReDNSMessage < Test::Unit::TestCase
     assert_equal [ ], message.nameservers
     assert_equal [ ], message.additional_records
     
-    assert_equal ";; HEADER:\n;; opcode: QUERY status: NOERROR id: 1 \n;; flags: ; QUERY: 0, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0\n;; QUESTION SECTION:\n\n;; ANSWER SECTION:\n\n;; NAMESERVER SECTION:\n\n;; ADDITIONAL SECTION:\n\n", message.to_s
+    assert_equal ";; HEADER:\n;; opcode: QUERY status: NOERROR id: 1 \n;; flags: rd; QUERY: 0, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0\n;; QUESTION SECTION:\n\n;; ANSWER SECTION:\n\n;; NAMESERVER SECTION:\n\n;; ADDITIONAL SECTION:\n\n", message.to_s
     
     message.increment_id!
     
@@ -33,7 +33,7 @@ class TestReDNSMessage < Test::Unit::TestCase
     message = ReDNS::Message.new(
   	  :authorative => true,
   	  :truncated => true,
-  	  :recursion_desired => true,
+  	  :recursion_desired => false,
   	  :recursion_available => true,
   	  :response_code => :server_failure
     )
@@ -51,7 +51,7 @@ class TestReDNSMessage < Test::Unit::TestCase
     assert_equal [ ], message.nameservers
     assert_equal [ ], message.additional_records
     
-    assert_equal ";; HEADER:\n;; opcode: QUERY status: SERVER_FAILURE id: 1 \n;; flags: aa tc rd ra; QUERY: 0, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0\n;; QUESTION SECTION:\n\n;; ANSWER SECTION:\n\n;; NAMESERVER SECTION:\n\n;; ADDITIONAL SECTION:\n\n", message.to_s
+    assert_equal ";; HEADER:\n;; opcode: QUERY status: SERVER_FAILURE id: 1 \n;; flags: aa tc ra; QUERY: 0, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0\n;; QUESTION SECTION:\n\n;; ANSWER SECTION:\n\n;; NAMESERVER SECTION:\n\n;; ADDITIONAL SECTION:\n\n", message.to_s
     
     message.increment_id!
     
@@ -112,7 +112,7 @@ class TestReDNSMessage < Test::Unit::TestCase
   	  ]
     )
     
-    assert_equal ";; HEADER:\n;; opcode: QUERY status: NOERROR id: 1 \n;; flags: aa tc; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 1\n;; QUESTION SECTION:\nexample.com. IN A\n;; ANSWER SECTION:\nexample.com. 1234 IN A 1.2.3.4\n;; NAMESERVER SECTION:\nexample.com. 4321 IN NS ns.example.com.\n;; ADDITIONAL SECTION:\nns.example.com. 9867 IN A 8.6.4.2\n", message.to_s
+    assert_equal ";; HEADER:\n;; opcode: QUERY status: NOERROR id: 1 \n;; flags: aa tc rd; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 1\n;; QUESTION SECTION:\nexample.com. IN A\n;; ANSWER SECTION:\nexample.com. 1234 IN A 1.2.3.4\n;; NAMESERVER SECTION:\nexample.com. 4321 IN NS ns.example.com.\n;; ADDITIONAL SECTION:\nns.example.com. 9867 IN A 8.6.4.2\n", message.to_s
     
     buffer = message.serialize
     assert !buffer.to_s.empty?
@@ -120,5 +120,52 @@ class TestReDNSMessage < Test::Unit::TestCase
     message_decoded = ReDNS::Message.new(buffer)
     
     assert_equal message.to_s, message_decoded.to_s
+  end
+  
+  def test_question_default_a
+    question = ReDNS::Message.question('example.com'.freeze)
+    
+    assert_equal ReDNS::Message, question.class
+    
+    assert question.query?
+    assert !question.response?
+    
+    assert_equal 1, question.questions.length
+    
+    assert_equal 'example.com.', question.questions[0].name.to_s
+    assert_equal :a, question.questions[0].qtype
+    assert_equal :in, question.questions[0].qclass
+  end
+
+  def test_question_default_ptr
+    question = ReDNS::Message.question('127.0.0.1'.freeze)
+    
+    assert_equal ReDNS::Message, question.class
+    
+    assert_equal 1, question.questions.length
+
+    assert_equal '127.0.0.1', question.questions[0].name.to_s
+    assert_equal :ptr, question.questions[0].qtype
+  end
+
+  def test_question_default_mx
+    question = ReDNS::Message.question('example.com'.freeze, :mx)
+    
+    assert_equal ReDNS::Message, question.class
+    
+    assert_equal 1, question.questions.length
+
+    assert_equal 'example.com.', question.questions[0].name.to_s
+    assert_equal :mx, question.questions[0].qtype
+  end
+
+  def test_question_does_yield
+    question = ReDNS::Message.question('example.com'.freeze) do |m|
+      m.id = 45532
+    end
+
+    assert_equal ReDNS::Message, question.class
+    
+    assert_equal 45532, question.id
   end
 end
