@@ -29,7 +29,14 @@ class ReDNS::Message < ReDNS::Fragment
   # == Class Methods ========================================================
   
   def self.question(name, qtype = nil)
-    qtype ||= ReDNS::Support.is_ip?(name) ? :ptr : :a
+    if (!qtype)
+      if (ReDNS::Support.is_ip?(name))
+        name = ReDNS::Support.addr_to_arpa(name)
+        qtype = :ptr
+      else
+        qtype = :a
+      end
+    end
     
     message = new(
       :questions => [

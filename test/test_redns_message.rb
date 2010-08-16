@@ -144,7 +144,7 @@ class TestReDNSMessage < Test::Unit::TestCase
     
     assert_equal 1, question.questions.length
 
-    assert_equal '127.0.0.1', question.questions[0].name.to_s
+    assert_equal '1.0.0.127.in-addr.arpa.', question.questions[0].name.to_s
     assert_equal :ptr, question.questions[0].qtype
   end
 
