@@ -81,4 +81,28 @@ class TestReDNSName < Test::Unit::TestCase
     
     assert_equal 0, example_buffer.length
   end
+
+  def test_double_pointer
+    example_buffer = ReDNS::Buffer.new(
+      [
+        3, ?c, ?o, ?m,
+        192, 6,
+        3, ?n, ?e, ?t,
+        0,
+        7, ?e, ?x, ?a, ?m, ?p, ?l, ?e,
+        192, 0
+      ].collect(&:chr).join
+    )
+    
+    # Skip past the first "net." / "com." part
+    example_buffer.advance(11)
+    
+    name = ReDNS::Name.new(example_buffer)
+    
+    assert_equal 'example.com.net.', name.to_s
+    
+    assert !name.empty?
+    
+    assert_equal 0, example_buffer.length
+  end
 end

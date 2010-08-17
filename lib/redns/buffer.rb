@@ -136,6 +136,6 @@ class ReDNS::Buffer < String
   end
   
   def inspect
-    "\#<#{self.class} #{to_s.inspect}>"
+    "\#<#{self.class} [#{to_s.bytes.collect { |c| '%02x' % c }.join(' ')}]>"
   end
 end

@@ -61,7 +61,7 @@ class ReDNS::Name < ReDNS::Fragment
 
         pointer = (c & 0x3F << 8) | buffer.unpack('C')[0]
 
-        return_to_offset = buffer.offset
+        return_to_offset ||= buffer.offset
         buffer.rewind
         buffer.advance(pointer)
       elsif (c == 0)
