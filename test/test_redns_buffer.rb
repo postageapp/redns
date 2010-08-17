@@ -136,6 +136,21 @@ class TestReDNSBuffer < Test::Unit::TestCase
     assert_equal [ (127 << 24 | 255) ], buffer.unpack('N')
   end
 
+  def test_unpack_exhausted_buffer
+    buffer = ReDNS::Buffer.new([ 127, 0, 0 ].pack('CCC'))
+    
+    assert_equal [ ], buffer.unpack('CCCC')
+
+    assert_equal [ 127, 0, 0 ], buffer.unpack('CCC')
+    
+    assert_equal 3, buffer.offset
+    assert_equal 0, buffer.length
+    
+    buffer.rewind
+    
+    assert_equal [ ], buffer.unpack('N')
+  end
+
   def test_pack
     buffer = ReDNS::Buffer.new
     

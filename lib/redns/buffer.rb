@@ -45,6 +45,9 @@ class ReDNS::Buffer < String
     data = to_s.unpack(format)
     advance(data.pack(format).length)
     data
+    
+  rescue TypeError
+    [ ]
   end
   
   def pack(contents, format)
