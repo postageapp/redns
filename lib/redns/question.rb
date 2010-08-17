@@ -1,8 +1,6 @@
 class ReDNS::Question < ReDNS::Fragment
   # == Constants ============================================================
   
-  SECTIONS = [ :questions, :answers, :nameservers, :additional_records ]
-
   # == Attributes ===========================================================
   
 	attribute :name, :class => ReDNS::Name, :default => lambda { ReDNS::Name.new }
