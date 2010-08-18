@@ -20,28 +20,39 @@ class TestReDNSConnection < Test::Unit::TestCase
     address = nil
     reverse = nil
     nameservers = nil
+    cname = nil
     
     EventMachine.run do
       dns = ReDNS::Connection.instance
       
       assert dns.nameservers.length > 0
       
+      # Simple address lookup, one A record
       dns.resolve('example.com') do |result|
         address = result
 
-        EventMachine.stop_event_loop if (address and reverse and nameservers)
+        EventMachine.stop_event_loop if (address and reverse and nameservers and cname)
       end
       
+      # Simple reverse lookup, one PTR record
       dns.resolve('192.0.32.10') do |result|
         reverse = result
 
-        EventMachine.stop_event_loop if (address and reverse and nameservers)
+        EventMachine.stop_event_loop if (address and reverse and nameservers and cname)
       end
       
+      # Simple nameserver lookup, multiple NS records
       dns.resolve('example.com', :ns) do |result|
         nameservers = result
 
-        EventMachine.stop_event_loop if (address and reverse and nameservers)
+        EventMachine.stop_event_loop if (address and reverse and nameservers and cname)
+      end
+
+      # Simple address lookup, one CNAME, one A, filtered to one A
+      dns.resolve('www.twg.ca', :a) do |result|
+        cname = result
+
+        EventMachine.stop_event_loop if (address and reverse and nameservers and cname)
       end
       
       EventMachine.add_timer(4) do
@@ -52,6 +63,8 @@ class TestReDNSConnection < Test::Unit::TestCase
     assert_equal %w[ 192.0.32.10 ], address
     assert_equal %w[ www.example.com. ], reverse
     assert_equal %w[ a.iana-servers.net. b.iana-servers.net. ], nameservers.sort
+    assert_equal %w[ 209.123.234.174 ], cname
+
   end
 
   def test_simple_timeout

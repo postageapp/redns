@@ -63,7 +63,17 @@ class ReDNS::Connection < EventMachine::Connection
     message = ReDNS::Message.new(ReDNS::Buffer.new(data))
     
     if (callback = @callback.delete(message.id))
-      callback[:callback].call(message.answers.collect { |a| a.rdata.to_s })
+      answers = message.answers
+
+      # If the request was made for a specific type of record...
+      if (type = callback[:type])
+        # ...only include that type of answer in the result set.
+        answers = answers.select { |a| a.rtype == type }
+      end
+
+      callback[:callback].call(
+        answers.collect { |a| a.rdata.to_s }
+      )
     end
   end
   
@@ -81,6 +91,7 @@ class ReDNS::Connection < EventMachine::Connection
     if (result > 0)
       @callback[@sequence] = {
         :callback => callback,
+        :type => type,
         :at => Time.now
       }
     else
