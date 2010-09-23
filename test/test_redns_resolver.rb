@@ -17,6 +17,28 @@ class TestReReDNSResolver < Test::Unit::TestCase
 		assert_equal [ "192.168.1.1" ], res.servers
   end
 
+  def test_simple_query
+		res = ReDNS::Resolver.new
+
+    r = res.simple_query(:a, 'example.com')
+    
+		assert_equal 1, r.size
+
+    assert_equal :a, r[0].rtype
+		assert_equal '192.0.32.10', r[0].rdata.to_s
+  end
+
+  def test_simple_reverse_query
+		res = ReDNS::Resolver.new
+
+    r = res.simple_query(:ptr, '10.32.0.192.in-addr.arpa')
+    
+		assert_equal 1, r.size
+
+    assert_equal :ptr, r[0].rtype
+		assert_equal 'www.example.com.', r[0].rdata.to_s
+  end
+
 	def test_query
 		res = ReDNS::Resolver.new
 
@@ -54,10 +76,12 @@ class TestReReDNSResolver < Test::Unit::TestCase
 
 	def test_bulk_query
 		addrs = %w[
-		  128.100.8.1
-		  128.100.8.2
-		  128.100.8.3
-		  128.100.8.4
+		  192.0.32.1
+		  192.0.32.2
+		  192.0.32.3
+		  192.0.32.4
+		  192.0.32.5
+		  192.0.32.10
 		].collect do |i|
 		  ReDNS::Support.addr_to_arpa(i)
 	  end
@@ -68,17 +92,19 @@ class TestReReDNSResolver < Test::Unit::TestCase
 
 		assert rlist
 
-		assert_equal 4, rlist.length
+		assert_equal 6, rlist.length
 		
 		assert_equal addrs.sort, rlist.keys.sort
 		
 		assert rlist[addrs[0]]
 		
 		expected =  %w[
-		  sf-ecf.gw.utoronto.ca.
-		  fs.ecf.utoronto.ca.
-		  ecf-if.gw.utoronto.ca.
-		  ecf-8-hub.ecf.utoronto.ca.
+		  32-1.lax.icann.org.
+		  32-2.lax.icann.org.
+		  32-3.lax.icann.org.
+		  32-4.lax.icann.org.
+		  32-5.lax.icann.org.
+		  www.example.com.
 		]
 
     answers = addrs.collect do |a|
@@ -90,10 +116,12 @@ class TestReReDNSResolver < Test::Unit::TestCase
 
 	def test_reverse_addresses
     addrs = %w[
-		  128.100.8.1
-		  128.100.8.2
-		  128.100.8.3
-		  128.100.8.4
+		  192.0.32.1
+		  192.0.32.2
+		  192.0.32.3
+		  192.0.32.4
+		  192.0.32.5
+		  192.0.32.10
 		]
 		
 		res = ReDNS::Resolver.new
@@ -105,10 +133,12 @@ class TestReReDNSResolver < Test::Unit::TestCase
 		assert_equal addrs.length, rlist.length
 
 		expected =  %w[
-		  sf-ecf.gw.utoronto.ca.
-		  fs.ecf.utoronto.ca.
-		  ecf-if.gw.utoronto.ca.
-		  ecf-8-hub.ecf.utoronto.ca.
+		  32-1.lax.icann.org.
+		  32-2.lax.icann.org.
+		  32-3.lax.icann.org.
+		  32-4.lax.icann.org.
+		  32-5.lax.icann.org.
+		  www.example.com.
 		]
 		
     answers = addrs.collect do |a|

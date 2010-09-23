@@ -210,14 +210,14 @@ class ReDNS::Resolver
 		end
 	end
 	
-	protected
+protected
 	def expand_answers(r)
 		unless (r and r.answers)
 			return nil
 		end
 
 		result = r.answers
-		radd = (r.additional or [ ])
+		radd = (r.additional_records or [ ])
 		
 		result.reject { |rr| rr.rtype == :a }.each do |rr|
 			# Additional resource records may be related to the query, or they
@@ -235,7 +235,7 @@ class ReDNS::Resolver
 			
 			if (additional and !additional.empty?)
 				# Push any results into the record itself
-				rr.additional = additional
+				r.additional_records = additional
 			end
 		end
 		
@@ -255,7 +255,7 @@ class ReDNS::Resolver
 			row
 		end
 		
-		r.additional and r.additional.each do |a|
+		r.additional_records and r.additional_records.each do |a|
 			row = a.to_a
 			rev[row[0]] = row[4]
 			res.push(row)
