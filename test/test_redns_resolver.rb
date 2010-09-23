@@ -39,6 +39,17 @@ class TestReReDNSResolver < Test::Unit::TestCase
 		assert_equal 'www.example.com.', r[0].rdata.to_s
   end
 
+  def test_simple_txt_query
+		res = ReDNS::Resolver.new
+
+    r = res.simple_query(:txt, 'gmail.com')
+    
+		assert_equal 1, r.size
+
+    assert_equal :txt, r[0].rtype
+		assert_equal 'v=spf1 redirect=_spf.google.com', r[0].rdata.to_s
+  end
+
 	def test_query
 		res = ReDNS::Resolver.new
 

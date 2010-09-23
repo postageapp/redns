@@ -31,7 +31,7 @@ class ReDNS::Buffer < String
       super(contents || '')
 
       @offset = offset ? offset.to_i : 0
-      @size = size ? size.to_i : nil
+      @size = size ? size.to_i : total_length
     end
     
     advance(0)
@@ -52,6 +52,15 @@ class ReDNS::Buffer < String
   
   def pack(contents, format)
     append(contents.pack(format))
+  end
+  
+  def slice(chars = 1)
+    return if (@offset + chars > total_length)
+
+    result = to_str[@offset, chars]
+    advance(chars)
+  
+    self.class.new(result)
   end
   
   def read(chars = 1)

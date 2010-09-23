@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'test/unit'
 
 [ %w[ .. lib ], %w[ . ] ].each do |path|

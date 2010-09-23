@@ -16,14 +16,17 @@ class ReDNS::Record::Null < ReDNS::Fragment
 	end
 	
 	def serialize(buffer = ReDNS::Buffer.new)
+	  buffer.pack('C', self.contents.length)
+
 	  buffer.append(self.contents)
 
 	  buffer
 	end
 
 	def deserialize(buffer)
-	  self.contents = buffer.to_s
-	  buffer.advance(self.contents.length)
+	  content_length = buffer.unpack('C')[0]
+	  
+	  self.contents = buffer.read(content_length)
 
 	  self
 	end

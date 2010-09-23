@@ -73,7 +73,7 @@ class ReDNS::Resource < ReDNS::Fragment
   		when :soa
   			self.rdata = ReDNS::Record::SOA.new(buffer)
   		when :txt, :null
-  			self.rdata = ReDNS::Record::Null.new(buffer.read(rdata_length))
+  			self.rdata = ReDNS::Record::Null.new(buffer.slice(rdata_length))
   		when :mx
   			self.rdata = ReDNS::Record::MX.new(buffer)
   		else
