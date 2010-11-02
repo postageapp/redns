@@ -35,14 +35,12 @@ class ReDNS::Record::SOA < ReDNS::Fragment
 	  self.rname.serialize(buffer)
 
 		buffer.pack(
-		  [
-  			self.serial,
-  			self.refresh,
-  			self.retry,
-  			self.expire,
-  			self.minimum
-		  ],
-		  'NNNNN'
+	    'NNNNN',
+			self.serial,
+			self.refresh,
+			self.retry,
+			self.expire,
+			self.minimum
 		)
 		
 		buffer

@@ -1,4 +1,4 @@
-require 'helper'
+require File.expand_path('helper', File.dirname(__FILE__))
 
 class TestReDNSResource < Test::Unit::TestCase
   def test_defaults
@@ -146,10 +146,9 @@ class TestReDNSResource < Test::Unit::TestCase
     buffer = null.serialize
     assert_equal 0, buffer.offset
 
-    assert_equal 'random data goes here'.length, buffer.length
+    assert_equal 'random data goes here', buffer.to_s[1, buffer.length]
 
     decoded_null = ReDNS::Record::Null.new(buffer)
-    
     assert_equal 'random data goes here', decoded_null.to_s
   end
 

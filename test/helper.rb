@@ -6,6 +6,10 @@ require 'test/unit'
   )
 end
 
+require 'rubygems'
+gem 'eventmachine'
+require 'eventmachine'
+
 require 'redns'
 
 class Test::Unit::TestCase

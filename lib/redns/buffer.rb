@@ -50,8 +50,8 @@ class ReDNS::Buffer < String
     [ ]
   end
   
-  def pack(contents, format)
-    append(contents.pack(format))
+  def pack(format, *contents)
+    append(contents.flatten.pack(format))
   end
   
   def slice(chars = 1)

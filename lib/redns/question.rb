@@ -19,11 +19,9 @@ class ReDNS::Question < ReDNS::Fragment
 	def serialize(buffer = ReDNS::Buffer.new)
 	  name.serialize(buffer)
 	  buffer.pack(
-	    [
-  	    ReDNS::RR_TYPE[self.qtype],
-  	    ReDNS::RR_CLASS[self.qclass]
-  	  ],
-  	  'nn'
+	    'nn',
+	    ReDNS::RR_TYPE[self.qtype],
+	    ReDNS::RR_CLASS[self.qclass]
   	)
 
     buffer

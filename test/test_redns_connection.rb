@@ -1,6 +1,4 @@
-require 'helper'
-
-require 'eventmachine'
+require File.expand_path('helper', File.dirname(__FILE__))
 
 class TestReDNSConnection < Test::Unit::TestCase
   def test_initializer
@@ -63,7 +61,7 @@ class TestReDNSConnection < Test::Unit::TestCase
     assert_equal %w[ 192.0.32.10 ], address
     assert_equal %w[ www.example.com. ], reverse
     assert_equal %w[ a.iana-servers.net. b.iana-servers.net. ], nameservers.sort
-    assert_equal %w[ 209.123.234.174 ], cname
+    assert_equal %w[ 74.207.228.18 ], cname
 
   end
 

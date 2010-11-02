@@ -1,4 +1,4 @@
-require 'helper'
+require File.expand_path('helper', File.dirname(__FILE__))
 
 class TestReDNSSupport < Test::Unit::TestCase
   include ReDNS::Support

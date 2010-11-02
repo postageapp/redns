@@ -37,13 +37,11 @@ class ReDNS::Resource < ReDNS::Fragment
 	  end
 	  
 	  buffer.pack(
-	    [
-  			ReDNS::RR_TYPE[self.rtype],
-  			ReDNS::RR_CLASS[self.rclass],
-  			self.ttl,
-  			data_buffer ? data_buffer.length : 0
-	    ],
-	    'nnNn'
+      'nnNn',
+			ReDNS::RR_TYPE[self.rtype],
+			ReDNS::RR_CLASS[self.rclass],
+			self.ttl,
+			data_buffer ? data_buffer.length : 0
 	  )
 	  
 	  if (data_buffer)

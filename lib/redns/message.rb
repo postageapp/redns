@@ -100,23 +100,21 @@ class ReDNS::Message < ReDNS::Fragment
 
 	def serialize(buffer = ReDNS::Buffer.new)
 	  buffer.pack(
-  		[
-  			self.id,
-  			(
-    			(self.query? ? 0 : 0x8000) |
-    			(ReDNS::OPCODE[self.opcode] || ReDNS::OPCODE[:unknown]) << 12 |
-    			(self.authorative? ? 0x0400 : 0) |
-    			(self.truncated? ? 0x0200 : 0) |
-    			(self.recursion_desired? ? 0x0100 : 0) |
-    			(self.recursion_available? ? 0x0080 : 0) |
-    			(ReDNS::RCODE[self.response_code] || ReDNS::RCODE[:noerror])
-  			),
-  		  self.questions.length,
-  			self.answers.length,
-  			self.nameservers.length,
-  			self.additional_records.length
-  		],
-  		'nnnnnn'
+		  'nnnnnn',
+			self.id,
+			(
+  			(self.query? ? 0 : 0x8000) |
+  			(ReDNS::OPCODE[self.opcode] || ReDNS::OPCODE[:unknown]) << 12 |
+  			(self.authorative? ? 0x0400 : 0) |
+  			(self.truncated? ? 0x0200 : 0) |
+  			(self.recursion_desired? ? 0x0100 : 0) |
+  			(self.recursion_available? ? 0x0080 : 0) |
+  			(ReDNS::RCODE[self.response_code] || ReDNS::RCODE[:noerror])
+			),
+		  self.questions.length,
+			self.answers.length,
+			self.nameservers.length,
+			self.additional_records.length
   	)
 
     [ :questions, :answers, :nameservers, :additional_records ].each do |section|

@@ -1,4 +1,4 @@
-require 'helper'
+require File.expand_path('helper', File.dirname(__FILE__))
 
 class TestReDNSBuffer < Test::Unit::TestCase
   def test_default_state
@@ -154,8 +154,8 @@ class TestReDNSBuffer < Test::Unit::TestCase
   def test_pack
     buffer = ReDNS::Buffer.new
     
-    buffer.pack([ 127, 0, 0, 255 ], 'CCCC')
-    buffer.pack([ 1, 2, 3, 4 ], 'CCCC')
+    buffer.pack('CCCC', 127, 0, 0, 255)
+    buffer.pack('CCCC', 1, 2, 3, 4)
     
     assert_equal 0, buffer.offset
     assert_equal 8, buffer.length

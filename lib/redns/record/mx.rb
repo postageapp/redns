@@ -17,7 +17,7 @@ class ReDNS::Record::MX < ReDNS::Fragment
 	end
 	
 	def serialize(buffer = ReDNS::Buffer.new)
-	  buffer.pack([ self.preference ], 'n')
+	  buffer.pack('n', self.preference)
 	  self.name.serialize(buffer)
 	end
 
