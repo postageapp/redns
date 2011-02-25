@@ -71,9 +71,7 @@ class ReDNS::Connection < EventMachine::Connection
         answers = answers.select { |a| a.rtype == type }
       end
 
-      callback[:callback].call(
-        answers.collect { |a| a.rdata.to_s }
-      )
+      callback[:callback].call(answers)
     end
   end
   
