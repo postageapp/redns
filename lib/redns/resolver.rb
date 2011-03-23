@@ -21,6 +21,10 @@ class ReDNS::Resolver
 		end
 		
 		list
+
+	rescue Errno::ENOENT
+	  # /etc/resolv.conf may not be present on misconfigured or offline systems
+	  [ ]
 	end
 	
 	def self.servers
