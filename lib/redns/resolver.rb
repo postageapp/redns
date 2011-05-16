@@ -108,7 +108,7 @@ class ReDNS::Resolver
 	end
 
 	def ptr_for(name)
-		simple_query(:ptr, DNS.to_arpa(name))
+		simple_query(:ptr, ReDNS::Support.addr_to_arpa(name))
 	end
 	
 	def ptr_for_list(name)
