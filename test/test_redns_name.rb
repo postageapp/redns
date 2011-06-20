@@ -86,7 +86,7 @@ class TestReDNSName < Test::Unit::TestCase
     example_buffer = ReDNS::Buffer.new(
       [
         3, ?c, ?o, ?m,
-        192, 6,
+        0xC0, 6,
         3, ?n, ?e, ?t,
         0,
         7, ?e, ?x, ?a, ?m, ?p, ?l, ?e,
@@ -104,5 +104,18 @@ class TestReDNSName < Test::Unit::TestCase
     assert !name.empty?
     
     assert_equal 0, example_buffer.length
+  end
+  
+  def test_circular_pointer
+    example_buffer = ReDNS::Buffer.new(
+      [
+        3, ?c, ?o, ?m,
+        0xC0, 0
+      ].collect(&:chr).join
+    )
+    
+    name = ReDNS::Name.new(example_buffer)
+
+    assert_equal 'com.' * (ReDNS::Name::POINTER_CHAIN_LIMIT + 1), name.to_s
   end
 end

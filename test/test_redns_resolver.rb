@@ -25,7 +25,7 @@ class TestReReDNSResolver < Test::Unit::TestCase
 		assert_equal 1, r.size
 
     assert_equal :a, r[0].rtype
-		assert_equal '192.0.32.10', r[0].rdata.to_s
+		assert_equal '192.0.43.10', r[0].rdata.to_s
   end
 
   def test_simple_reverse_query
@@ -63,7 +63,7 @@ class TestReReDNSResolver < Test::Unit::TestCase
 		assert_equal 1, r.questions.size
 		assert_equal 1, r.answers.size
 
-		assert_equal '192.0.32.10', r.answers[0].rdata.to_s
+		assert_equal '192.0.43.10', r.answers[0].rdata.to_s
 	end
 
 	def test_ns_query
@@ -87,12 +87,12 @@ class TestReReDNSResolver < Test::Unit::TestCase
 
 	def test_bulk_query
 		addrs = %w[
-		  192.0.32.1
-		  192.0.32.2
-		  192.0.32.3
-		  192.0.32.4
-		  192.0.32.5
 		  192.0.32.10
+		  192.0.32.12
+		  192.0.32.13
+		  192.0.32.14
+		  192.0.32.15
+		  192.0.32.16
 		].collect do |i|
 		  ReDNS::Support.addr_to_arpa(i)
 	  end
@@ -110,12 +110,12 @@ class TestReReDNSResolver < Test::Unit::TestCase
 		assert rlist[addrs[0]]
 		
 		expected =  %w[
-		  32-1.lax.icann.org.
-		  32-2.lax.icann.org.
-		  32-3.lax.icann.org.
-		  32-4.lax.icann.org.
-		  32-5.lax.icann.org.
 		  www.example.com.
+		  redirects.iana.org.
+		  tools.iana.org.
+		  nomcom.icann.org.
+		  confirm.icann.org.
+		  dnscert.com.
 		]
 
     answers = addrs.collect do |a|
@@ -126,13 +126,13 @@ class TestReReDNSResolver < Test::Unit::TestCase
 	end
 
 	def test_reverse_addresses
-    addrs = %w[
-		  192.0.32.1
-		  192.0.32.2
-		  192.0.32.3
-		  192.0.32.4
-		  192.0.32.5
+		addrs = %w[
 		  192.0.32.10
+		  192.0.32.12
+		  192.0.32.13
+		  192.0.32.14
+		  192.0.32.15
+		  192.0.32.16
 		]
 		
 		res = ReDNS::Resolver.new
@@ -144,12 +144,12 @@ class TestReReDNSResolver < Test::Unit::TestCase
 		assert_equal addrs.length, rlist.length
 
 		expected =  %w[
-		  32-1.lax.icann.org.
-		  32-2.lax.icann.org.
-		  32-3.lax.icann.org.
-		  32-4.lax.icann.org.
-		  32-5.lax.icann.org.
 		  www.example.com.
+		  redirects.iana.org.
+		  tools.iana.org.
+		  nomcom.icann.org.
+		  confirm.icann.org.
+		  dnscert.com.
 		]
 		
     answers = addrs.collect do |a|

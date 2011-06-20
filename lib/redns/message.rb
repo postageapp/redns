@@ -1,7 +1,7 @@
 class ReDNS::Message < ReDNS::Fragment
   # == Constants ============================================================
   
-  SECTIONS = [ :questions, :answers, :nameservers, :additional_records ]
+  SECTIONS = [ :questions, :answers, :nameservers, :additional_records ].freeze
 
   # == Attributes ===========================================================
   
@@ -28,6 +28,9 @@ class ReDNS::Message < ReDNS::Fragment
 
   # == Class Methods ========================================================
   
+  # Constructs a question that asks for more information about a given
+  # resource with an optional query type specified. Query type defaults to
+  # :ptr for dotted-quad IP addresses, :a otherwise.
   def self.question(name, qtype = nil)
     if (!qtype)
       if (ReDNS::Support.is_ip?(name))
@@ -55,13 +58,17 @@ class ReDNS::Message < ReDNS::Fragment
   # == Instance Methods =====================================================
   
 	def increment_id!
-	  self.id += 1
+	  self.id = (self.id + 1) % 0x10000
 	end
 
+  # Returns true if this is a response type message, false otherwise, as is
+  # the case with query messages.
 	def response?
 	  !self.query?
 	end
 	
+	# Returns a string representation of the message in a format similar to what
+	# the dig shell utility produces.
 	def to_s
 	  flags = [ ]
 	  flags << 'qr' if (response?)
@@ -83,10 +90,13 @@ class ReDNS::Message < ReDNS::Fragment
 		additional_records.collect(&:to_s).join("\n") + "\n"
 	end
 	
+	# Returns the length of the encoded DNS request.
 	def length
 		to_dns.length
 	end
 	
+	# Returns true if the questions, answers, nameservers and additional records
+	# are all empty, false otherwise.
 	def empty?
 		questions.empty? and
 		  answers.empty? and
@@ -94,10 +104,13 @@ class ReDNS::Message < ReDNS::Fragment
 		  additional_records.empty?
 	end
 	
+	# Returns a YAML serialized version of the message.
 	def to_yaml
 		@attributes.to_yaml
 	end
 
+  # Serializes the message into a supplied buffer, or allocates a new one to
+  # store it. Returns the buffer used.
 	def serialize(buffer = ReDNS::Buffer.new)
 	  buffer.pack(
 		  'nnnnnn',
@@ -126,10 +139,16 @@ class ReDNS::Message < ReDNS::Fragment
     buffer
 	end
 
+  # Extracts a message from the supplied buffer. Will return the message if
+  # successful, nil if an error occurred or no suitable data cound be found
+  # in the buffer.
 	def deserialize(buffer)
 	  return unless (buffer)
 	  
 		data = buffer.unpack("nnnnnn")
+		
+		# Abandon efforts to decode if insufficient data is available.
+		return if (data.length < 6)
 		
 		self.id = data.shift
 

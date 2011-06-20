@@ -4,6 +4,7 @@ class ReDNS::Connection < EventMachine::Connection
   # == Constants ============================================================
   
   DEFAULT_TIMEOUT = 5
+  SEQUENCE_LIMIT = 0x10000
   
   # == Properties ===========================================================
   
@@ -15,6 +16,8 @@ class ReDNS::Connection < EventMachine::Connection
 
   # == Class Methods ========================================================
 
+  # Returns a new instance of a reactor-bound resolver. If a block is given,
+  # the instance is supplied for customization purposes.
   def self.instance
     connection = EventMachine.open_datagram_socket(
       ReDNS::Support.bind_all_addr,
@@ -32,7 +35,7 @@ class ReDNS::Connection < EventMachine::Connection
   def post_init
     # Sequence numbers do not have to be cryptographically secure, but having
     # a healthy amount of randomness is a good thing.
-    @sequence = (rand(0x10000) ^ (object_id ^ (Time.now.to_f * 100000).to_i)) % 0x10000
+    @sequence = (rand(SEQUENCE_LIMIT) ^ (object_id ^ (Time.now.to_f * SEQUENCE_LIMIT).to_i)) % SEQUENCE_LIMIT
     
     # Callback tracking is done by matching response IDs in a lookup table
     @callback = { }
@@ -97,6 +100,7 @@ class ReDNS::Connection < EventMachine::Connection
     end
 
     @sequence += 1
+    @sequence %= SEQUENCE_LIMIT
   end
   
   def unbind
