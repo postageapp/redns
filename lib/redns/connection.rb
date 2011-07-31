@@ -45,19 +45,27 @@ class ReDNS::Connection < EventMachine::Connection
     end
   end
   
-  def random_nameserver
-    nameservers[rand(nameservers.length)]
-  end
-  
+  # Returns the configured list of nameservers as an Array. If not configured
+  # specifically, will look in the resolver configuration file, typically
+  # /etc/resolv.conf for which servers to use.
   def nameservers
     @nameservers ||= ReDNS::Support.default_nameservers
   end
-  
+
+  # Configure the nameservers to use. Supplied value can be either a string
+  # containing one IP address, an Array containing multiple IP addresses, or
+  # nil which reverts to defaults.
   def nameservers=(*list)
     @nameservers = list.flatten.compact
     @nameservers = nil if (list.empty?)
   end
   
+  # Picks a random nameserver from the configured list=
+  def random_nameserver
+    nameservers[rand(nameservers.length)]
+  end
+
+  # Returns the current port in use.
   def port
     Socket.unpack_sockaddr_in(get_sockname)[0]
   end
