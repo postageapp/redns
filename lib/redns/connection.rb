@@ -78,8 +78,10 @@ class ReDNS::Connection < EventMachine::Connection
 
       # If the request was made for a specific type of record...
       if (type = callback[:type])
-        # ...only include that type of answer in the result set.
-        answers = answers.select { |a| a.rtype == type }
+        if (type != :any)
+          # ...only include that type of answer in the result set.
+          answers = answers.select { |a| a.rtype == type }
+        end
       end
 
       callback[:callback].call(answers)
