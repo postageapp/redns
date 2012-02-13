@@ -4,14 +4,15 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{redns}
-  s.version = "0.1.15"
+  s.name = "redns"
+  s.version = "0.1.16"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = [%q{tadman}]
-  s.date = %q{2011-08-10}
-  s.description = %q{ReDNS is a pure Ruby DNS library with drivers for reactor-model engines such as EventMachine}
-  s.email = %q{github@tadman.ca}
+  s.authors = ["tadman"]
+  s.date = "2012-02-13"
+  s.description = "ReDNS is a pure Ruby DNS library with drivers for reactor-model engines such as EventMachine"
+  s.email = "github@tadman.ca"
+  s.executables = ["redig"]
   s.extra_rdoc_files = [
     "README.rdoc"
   ]
@@ -20,6 +21,7 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "bin/redig",
     "lib/redns.rb",
     "lib/redns/address.rb",
     "lib/redns/buffer.rb",
@@ -32,6 +34,8 @@ Gem::Specification.new do |s|
     "lib/redns/record/mx.rb",
     "lib/redns/record/null.rb",
     "lib/redns/record/soa.rb",
+    "lib/redns/record/spf.rb",
+    "lib/redns/record/txt.rb",
     "lib/redns/resolver.rb",
     "lib/redns/resource.rb",
     "lib/redns/support.rb",
@@ -49,10 +53,10 @@ Gem::Specification.new do |s|
     "test/test_redns_resource.rb",
     "test/test_redns_support.rb"
   ]
-  s.homepage = %q{http://github.com/tadman/redns}
-  s.require_paths = [%q{lib}]
-  s.rubygems_version = %q{1.8.7}
-  s.summary = %q{Ruby Reactor-Ready DNS Library}
+  s.homepage = "http://github.com/tadman/redns"
+  s.require_paths = ["lib"]
+  s.rubygems_version = "1.8.11"
+  s.summary = "Ruby Reactor-Ready DNS Library"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
