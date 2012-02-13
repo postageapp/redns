@@ -68,12 +68,16 @@ class ReDNS::Resource < ReDNS::Fragment
   			self.rdata = ReDNS::Address.new(buffer)
   		when :cname, :ptr, :ns
   			self.rdata = ReDNS::Name.new(buffer)
-  		when :soa
-  			self.rdata = ReDNS::Record::SOA.new(buffer)
-  		when :txt, :null
-  		  self.rdata = (rdata_length and ReDNS::Record::Null.new(buffer.slice(rdata_length)))
   		when :mx
   			self.rdata = ReDNS::Record::MX.new(buffer)
+  		when :soa
+  			self.rdata = ReDNS::Record::SOA.new(buffer)
+  		when :null
+  		  self.rdata = (rdata_length and ReDNS::Record::Null.new(buffer.slice(rdata_length)))
+		  when :spf
+		    self.rdata = (rdata_length and ReDNS::Record::SPF.new(buffer.slice(rdata_length)))
+  		when :txt
+  		  self.rdata = (rdata_length and ReDNS::Record::TXT.new(buffer.slice(rdata_length)))
   		else
         # FUTURE: Throw exception here when trying to decode invalid type
   		  nil

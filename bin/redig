@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH << File.expand_path(File.join('..','lib'), File.dirname(__FILE__))
+
+require 'optparse'
+
+require 'redns'
+
+# == Main ===================================================================
+
+options = {
+  :query_type => :any,
+}
+
+op = OptionParser.new do |op|
+  op.on("-t", "--type=s") do |type|
+    options[:query_type] = type.to_sym
+  end
+end
+
+# Look for command-line arguments prefixed with '@' and push these into the
+# options for nameservers.
+queries = op.parse(*ARGV).select do |query|
+  case (query)
+  when /^@(.*)/
+    (options[:nameservers] ||= [ ]) << $1
+    false
+  else
+    true
+  end
+end
+
+resolver = ReDNS::Resolver.new do |resolver|
+  if (options[:nameservers])
+    resolver.servers = options[:nameservers]
+  end
+end
+
+queries.each do |query|
+  results = resolver.simple_query(options[:query_type], query)
+  
+  if (results)
+    results.each do |result|
+      puts result.to_s
+    end
+  else
+    puts "No results"
+  end
+end

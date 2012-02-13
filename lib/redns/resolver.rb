@@ -216,6 +216,7 @@ class ReDNS::Resolver
 	
 protected
 	def expand_answers(r)
+
 		unless (r and r.answers)
 			return nil
 		end
@@ -223,7 +224,16 @@ protected
 		result = r.answers
 		radd = (r.additional_records or [ ])
 		
-		result.reject { |rr| rr.rtype == :a }.each do |rr|
+		result.select do |rr|
+		  case (rr.rtype)
+	    when :ns
+	      # These record types require further investigation if they are to
+	      # be included in the result-set.
+	      true
+      else
+        false
+		  end
+		end.each do |rr|
 			# Additional resource records may be related to the query, or they
 			# might just be convenience records that are not directly helpful.
 			

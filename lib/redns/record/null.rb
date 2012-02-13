@@ -24,8 +24,12 @@ class ReDNS::Record::Null < ReDNS::Fragment
 	end
 
 	def deserialize(buffer)
-	  if (content_length = buffer.unpack('C')[0])
-  	  self.contents = buffer.read(content_length)
+	  self.contents = ''
+	  
+	  while (!buffer.empty?)
+  	  if (content_length = buffer.unpack('C')[0])
+    	  self.contents << buffer.unpack("a#{content_length}")[0]
+  	  end
 	  end
 
 	  self

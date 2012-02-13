@@ -13,6 +13,25 @@ class TestReDNSBuffer < Test::Unit::TestCase
     
     assert_equal nil, buffer.read
   end
+
+  def test_empty_state
+    buffer = ReDNS::Buffer.new('test')
+    
+    assert_equal false, buffer.empty?
+    
+    buffer.unpack('C4')
+
+    assert_equal true, buffer.empty?
+    
+    assert_equal 4, buffer.offset
+    
+    buffer.append('test')
+
+    assert_equal 4, buffer.offset
+    assert_equal 4, buffer.length
+    
+    assert_equal false, buffer.empty?
+  end
     
   def test_simple_duplicate
     buffer = ReDNS::Buffer.new('example'.freeze, 1, 3)

@@ -3,7 +3,7 @@ class ReDNS::Buffer < String
 
   # == Properties ===========================================================
   
-  alias_method :total_length, :length
+  alias_method :string_length, :length
   alias_method :total_size, :size
 
   attr_reader :offset
@@ -24,23 +24,27 @@ class ReDNS::Buffer < String
       super('')
       
       @offset = 0
-      @size = total_length
+      @size = string_length
       
       contents.serialize(self)
     else
       super(contents || '')
 
       @offset = offset ? offset.to_i : 0
-      @size = size ? size.to_i : total_length
+      @size = size ? size.to_i : string_length
     end
     
     advance(0)
   end
   
+  def empty?
+    @offset >= string_length
+  end
+  
   def unpack(format)
     return [ ] if (@size <= 0)
     
-    return if (@offset > total_length)
+    return if (@offset > string_length)
 
     data = to_s.unpack(format)
     advance(data.pack(format).length)
@@ -55,7 +59,7 @@ class ReDNS::Buffer < String
   end
   
   def slice(chars = 1)
-    return if (@offset + chars > total_length)
+    return if (@offset + chars > string_length)
 
     result = to_str[@offset, chars]
     advance(chars)
@@ -64,7 +68,7 @@ class ReDNS::Buffer < String
   end
   
   def read(chars = 1)
-    return if (@offset + chars > total_length)
+    return if (@offset + chars > string_length)
 
     result = to_str[@offset, chars]
     advance(chars)
@@ -95,18 +99,18 @@ class ReDNS::Buffer < String
     else
       @offset += chars
 
-      if (@offset > total_length)
-        @offset = total_length
+      if (@offset > string_length)
+        @offset = string_length
       end
 
-      max_length = (total_length - @offset)
+      max_length = (string_length - @offset)
 
       if (!@size or @size > max_length)
         @size = max_length
       end
     end
     
-    @size ||= total_length - @offset
+    @size ||= string_length - @offset
     
     self
   end
