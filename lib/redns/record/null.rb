@@ -28,7 +28,9 @@ class ReDNS::Record::Null < ReDNS::Fragment
 	  
 	  while (!buffer.empty?)
   	  if (content_length = buffer.unpack('C')[0])
-    	  self.contents << buffer.unpack("a#{content_length}")[0]
+  	    if (string = buffer.unpack("a#{content_length}")[0])
+      	  self.contents << string
+    	  end
   	  end
 	  end
 
