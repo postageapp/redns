@@ -14,4 +14,4 @@ In addition, RFC2671 extension mechanisms are also supported.
 
 == Copyright
 
-(C) 2005-2012 Scott Tadman
+(C) 2005-2013 Scott Tadman
