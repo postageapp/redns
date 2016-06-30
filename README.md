@@ -9,8 +9,8 @@ In addition, RFC2671 extension mechanisms are also supported.
 
 ## References
 
-[RFC1035](http://www.faqs.org/rfcs/rfc1035.html)
-[RFC2671](http://www.faqs.org/rfcs/rfc2671.html)
+* [RFC1035](http://www.faqs.org/rfcs/rfc1035.html) - Domain names - implementation and specification
+* [RFC2671](http://www.faqs.org/rfcs/rfc2671.html) - Extension Mechanisms for DNS (EDNS0)
 
 ## Copyright
 
