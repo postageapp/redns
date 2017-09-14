@@ -26,7 +26,7 @@ class TestReDNSName < Test::Unit::TestCase
     assert !name.empty?
   end
 
-  def test_defaults
+  def test_defaults_with_raw_buffer
     example_buffer = ReDNS::Buffer.new(
       [
         7, ?e, ?x, ?a, ?m, ?p, ?l, ?e,

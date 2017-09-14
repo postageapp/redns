@@ -9,7 +9,7 @@ require 'redns'
 # == Main ===================================================================
 
 options = {
-  :query_type => :any,
+  query_type: :any,
 }
 
 op = OptionParser.new do |op|

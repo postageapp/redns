@@ -9,7 +9,7 @@ class ReDNS::Connection < EventMachine::Connection
   
   # == Properties ===========================================================
   
-  attr_accessor :timeout, :attempts
+  attr_reader :timeout, :attempts
 
   # == Extensions ===========================================================
 
@@ -93,13 +93,13 @@ class ReDNS::Connection < EventMachine::Connection
 
     if (result > 0)
       @callback[@sequence] = {
-        :serialized_message => serialized_message,
-        :type => type,
-        :filter_by_type => (type == :any || !filter) ? false : type,
-        :nameserver => target_nameserver,
-        :attempts => self.attempts - 1,
-        :callback => callback,
-        :at => Time.now
+        serialized_message: serialized_message,
+        type: type,
+        filter_by_type: (type == :any || !filter) ? false : type,
+        nameserver: target_nameserver,
+        attempts: self.attempts - 1,
+        callback: callback,
+        at: Time.now
       }
     else
       callback.call(nil)

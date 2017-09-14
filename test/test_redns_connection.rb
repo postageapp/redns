@@ -58,10 +58,10 @@ class TestReDNSConnection < Test::Unit::TestCase
       end
     end
     
-    assert_equal %w[ 192.0.43.10 ], address.collect { |a| a.rdata.to_s }
+    assert_equal %w[ 93.184.216.34 ], address.collect { |a| a.rdata.to_s }
     assert_equal %w[ 43-10.any.icann.org. ], reverse.collect { |a| a.rdata.to_s }
     assert_equal %w[ a.iana-servers.net. b.iana-servers.net. ], nameservers.collect { |a| a.rdata.to_s }.sort
-    assert_equal %w[ 74.207.228.18 ], cname.collect { |a| a.rdata.to_s }
+    assert_equal %w[ 173.255.229.30 ], cname.collect { |a| a.rdata.to_s }
   end
 
   def test_simple_timeout
@@ -113,6 +113,6 @@ class TestReDNSConnection < Test::Unit::TestCase
     end
     
     assert address
-    assert_equal '192.0.43.10', address.first.rdata.to_s
+    assert_equal '93.184.216.34', address.first.rdata.to_s
   end
 end

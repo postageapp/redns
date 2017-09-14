@@ -31,11 +31,11 @@ class TestReDNSMessage < Test::Unit::TestCase
 
   def test_message_all_flags
     message = ReDNS::Message.new(
-  	  :authorative => true,
-  	  :truncated => true,
-  	  :recursion_desired => false,
-  	  :recursion_available => true,
-  	  :response_code => :server_failure
+      authorative: true,
+      truncated: true,
+      recursion_desired: false,
+      recursion_available: true,
+      response_code: :server_failure
     )
     
     assert_equal true, message.query?
@@ -66,9 +66,9 @@ class TestReDNSMessage < Test::Unit::TestCase
   def test_simple_query
     message = ReDNS::Message.new
     
-    question = ReDNS::Question.new do |question|
-      question.name = 'example.com'
-      question.qtype = :a
+    question = ReDNS::Question.new do |q|
+      q.name = 'example.com'
+      q.qtype = :a
     end
     
     message.questions << question
@@ -78,38 +78,38 @@ class TestReDNSMessage < Test::Unit::TestCase
 
   def test_encoded_fields
     message = ReDNS::Message.new(
-  	  :authorative => true,
-  	  :truncated => true,
-  	  :questions => [
-  	      ReDNS::Question.new(
-  	        :name => 'example.com',
-  	        :qtype => :a
-  	      )
-  	  ],
-  	  :answers => [
-  	    ReDNS::Resource.new(
-  	      :name => 'example.com',
-  	      :rtype => :a,
-  	      :rdata => ReDNS::Address.new('1.2.3.4'),
-  	      :ttl => 1234
-  	    )
-  	  ],
-  	  :nameservers => [
-  	    ReDNS::Resource.new(
-  	      :name => 'example.com',
-  	      :rtype => :ns,
-  	      :rdata => ReDNS::Name.new('ns.example.com'),
-  	      :ttl => 4321
-  	    )
-  	  ],
-  	  :additional_records => [
-  	    ReDNS::Resource.new(
-  	      :name => 'ns.example.com',
-  	      :rtype => :a,
-  	      :rdata => ReDNS::Address.new('8.6.4.2'),
-  	      :ttl => 9867
-  	    )
-  	  ]
+      authorative: true,
+      truncated: true,
+      questions: [
+          ReDNS::Question.new(
+            name: 'example.com',
+            qtype: :a
+          )
+      ],
+      answers: [
+        ReDNS::Resource.new(
+          name: 'example.com',
+          rtype: :a,
+          rdata: ReDNS::Address.new('1.2.3.4'),
+          ttl: 1234
+        )
+      ],
+      nameservers: [
+        ReDNS::Resource.new(
+          name: 'example.com',
+          rtype: :ns,
+          rdata: ReDNS::Name.new('ns.example.com'),
+          ttl: 4321
+        )
+      ],
+      additional_records: [
+        ReDNS::Resource.new(
+          name: 'ns.example.com',
+          rtype: :a,
+          rdata: ReDNS::Address.new('8.6.4.2'),
+          ttl: 9867
+        )
+      ]
     )
     
     assert_equal ";; HEADER:\n;; opcode: QUERY status: NOERROR id: 1 \n;; flags: aa tc rd; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 1\n;; QUESTION SECTION:\nexample.com. IN A\n;; ANSWER SECTION:\nexample.com. 1234 IN A 1.2.3.4\n;; NAMESERVER SECTION:\nexample.com. 4321 IN NS ns.example.com.\n;; ADDITIONAL SECTION:\nns.example.com. 9867 IN A 8.6.4.2\n", message.to_s

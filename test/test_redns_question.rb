@@ -12,8 +12,8 @@ class TestReDNSQuestion < Test::Unit::TestCase
 
   def test_example_query
     question = ReDNS::Question.new(
-      :name => 'example.com',
-      :qtype => :a
+      name: 'example.com',
+      qtype: :a
     )
     
     assert_equal :a, question.qtype

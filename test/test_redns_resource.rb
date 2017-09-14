@@ -9,8 +9,8 @@ class TestReDNSResource < Test::Unit::TestCase
 
   def test_serialize_cycle_mx
     mx = ReDNS::Record::MX.new(
-      :preference => 10,
-      :name => 'mx.example.com'
+      preference: 10,
+      name: 'mx.example.com'
     )
     
     assert_equal 10, mx.preference
@@ -30,13 +30,13 @@ class TestReDNSResource < Test::Unit::TestCase
 
   def test_serialize_cycle_record_mx
     mx = ReDNS::Resource.new(
-      :name => 'example.com',
-      :rdata => ReDNS::Record::MX.new(
-        :preference => 10,
-        :name => 'mx.example.com'
+      name: 'example.com',
+      rdata: ReDNS::Record::MX.new(
+        preference: 10,
+        name: 'mx.example.com'
       ),
-      :ttl => 123456,
-      :rtype => :mx
+      ttl: 123456,
+      rtype: :mx
     )
     
     assert_equal 'example.com.', mx.name.to_s
@@ -61,13 +61,13 @@ class TestReDNSResource < Test::Unit::TestCase
 
   def test_serialize_cycle_soa
     soa = ReDNS::Record::SOA.new(
-      :mname => 'example.com',
-      :rname => 'domainadmin.example.com',
-      :serial => 1001,
-      :refresh => 1002,
-      :retry => 1003,
-      :expire => 1004,
-      :minimum => 1005
+      mname: 'example.com',
+      rname: 'domainadmin.example.com',
+      serial: 1001,
+      refresh: 1002,
+      retry: 1003,
+      expire: 1004,
+      minimum: 1005
     )
     
     assert_equal 'example.com.', soa.mname.to_s
@@ -91,18 +91,18 @@ class TestReDNSResource < Test::Unit::TestCase
 
   def test_serialize_cycle_record_soa
     soa = ReDNS::Resource.new(
-      :name => 'example.com',
-      :rdata => ReDNS::Record::SOA.new(
-        :mname => 'example.com',
-        :rname => 'domainadmin.example.com',
-        :serial => 1001,
-        :refresh => 1002,
-        :retry => 1003,
-        :expire => 1004,
-        :minimum => 1005
+      name: 'example.com',
+      rdata: ReDNS::Record::SOA.new(
+        mname: 'example.com',
+        rname: 'domainadmin.example.com',
+        serial: 1001,
+        refresh: 1002,
+        retry: 1003,
+        expire: 1004,
+        minimum: 1005
       ),
-      :ttl => 123456,
-      :rtype => :soa
+      ttl: 123456,
+      rtype: :soa
     )
 
     assert_equal 'example.com.', soa.name.to_s
@@ -136,7 +136,7 @@ class TestReDNSResource < Test::Unit::TestCase
 
   def test_serialize_cycle_null
     null = ReDNS::Record::Null.new(
-      :contents => 'random data goes here'.freeze
+      contents: 'random data goes here'.freeze
     )
     
     assert_equal 'random data goes here', null.contents
@@ -154,12 +154,12 @@ class TestReDNSResource < Test::Unit::TestCase
 
   def test_serialize_cycle_record_null
     null = ReDNS::Resource.new(
-      :name => 'example.com',
-      :rdata => ReDNS::Record::Null.new(
-        :contents => 'random data goes here'.freeze
+      name: 'example.com',
+      rdata: ReDNS::Record::Null.new(
+        contents: 'random data goes here'.freeze
       ),
-      :ttl => 123456,
-      :rtype => :null
+      ttl: 123456,
+      rtype: :null
     )
     
     assert_equal 'example.com.', null.name.to_s

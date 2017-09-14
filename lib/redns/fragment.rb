@@ -76,10 +76,10 @@ class ReDNS::Fragment
 
   # == Instance Methods =====================================================
   
-	def initialize(contents = nil)
-	  @attributes = { }
+  def initialize(contents = nil)
+    @attributes = { }
 
-	  case (contents)
+    case (contents)
     when Hash
       assign(contents)
     when ReDNS::Buffer
@@ -94,8 +94,8 @@ class ReDNS::Fragment
     end
     
     yield(self) if (block_given?)
-	end
-	
+  end
+  
 protected
   def assign(attributes)
     attributes.each do |k, v|

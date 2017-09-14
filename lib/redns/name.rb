@@ -5,7 +5,7 @@ class ReDNS::Name < ReDNS::Fragment
   
   # == Attributes ===========================================================
   
-  attribute :name, :default => '.'
+  attribute :name, default: '.'
 
   # == Instance Methods =====================================================
   
@@ -16,7 +16,7 @@ class ReDNS::Name < ReDNS::Fragment
       # method, not intercepted and treated as an actual String
       super(contents)
     when String
-      super(:name => contents)
+      super(name: contents)
       
       unless (ReDNS::Support.is_ip?(name) or self.name.match(/\.$/))
         self.name += '.'
@@ -26,37 +26,37 @@ class ReDNS::Name < ReDNS::Fragment
     end
   end
   
-	def to_s
-	  self.name
-	end
-	
-	def to_a
-		[ self.name ]
-	end
-	
-	def length
-		to_s.length
-	end
-	
-	def empty?
-		name == '.'
-	end
-	
-	def serialize(buffer = ReDNS::Buffer.new)
-		buffer.append(
-		  self.name.split(/\./).collect { |l| [ l.length, l ].pack("ca*") }.join('')
-		)
+  def to_s
+    self.name
+  end
+  
+  def to_a
+    [ self.name ]
+  end
+  
+  def length
+    to_s.length
+  end
+  
+  def empty?
+    name == '.'
+  end
+  
+  def serialize(buffer = ReDNS::Buffer.new)
+    buffer.append(
+      self.name.split(/\./).collect { |l| [ l.length, l ].pack("ca*") }.join('')
+    )
 
-		buffer.append("\0")
-		
-		buffer
-	end
-	
-	def deserialize(buffer)
-		self.name = ''
-		
-		return_to_offset = nil
-		pointer_count = 0
+    buffer.append("\0")
+    
+    buffer
+  end
+  
+  def deserialize(buffer)
+    self.name = ''
+    
+    return_to_offset = nil
+    pointer_count = 0
 
     while (c = buffer.unpack('C')[0])
       if (c & 0xC0 == 0xC0)
@@ -99,7 +99,9 @@ class ReDNS::Name < ReDNS::Fragment
       buffer.rewind
       buffer.advance(return_to_offset)
     end
+
+    self.name.encode!('UTF-8')
     
     self
-	end
+  end
 end

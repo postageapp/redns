@@ -2,11 +2,11 @@ require File.expand_path('helper', File.dirname(__FILE__))
 
 class ExampleFragment < ReDNS::Fragment
   attribute :sample
-  attribute :sample_int, :convert => :to_i, :default => 0
-  attribute :sample_proc, :convert => lambda { |v| v.to_i * 2 }
-  attribute :sample_class, :convert => ReDNS::Buffer
-  attribute :sample_default, :default => lambda { 5 }
-  attribute :sample_boolean, :boolean => true
+  attribute :sample_int, convert: :to_i, default: 0
+  attribute :sample_proc, convert: lambda { |v| v.to_i * 2 }
+  attribute :sample_class, convert: ReDNS::Buffer
+  attribute :sample_default, default: lambda { 5 }
+  attribute :sample_boolean, boolean: true
 end
 
 class TestReDNSFragment < Test::Unit::TestCase
@@ -46,8 +46,8 @@ class TestReDNSFragment < Test::Unit::TestCase
   end
 
   def test_initialize_with_block
-    fragment = ExampleFragment.new do |fragment|
-      fragment.sample = "Example"
+    fragment = ExampleFragment.new do |f|
+      f.sample = "Example"
     end
     
     assert_equal "Example", fragment.sample
