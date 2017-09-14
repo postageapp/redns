@@ -7,6 +7,18 @@ DNS records that are specified in RFC1035.
 
 In addition, RFC2671 extension mechanisms are also supported.
 
+## Installation
+
+To install as a dependency, add to your `Gemfile`:
+
+    gem 'redns'
+
+Then `bundle install` should pick up any dependencies.
+
+## Usage
+
+
+
 ## References
 
 * [RFC1035](http://www.faqs.org/rfcs/rfc1035.html) - Domain names - implementation and specification
