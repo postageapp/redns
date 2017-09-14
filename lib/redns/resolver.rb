@@ -4,31 +4,29 @@ require 'fcntl'
 BasicSocket.do_not_reverse_lookup = true
 
 class ReDNS::Resolver
-  # == Class Properties =====================================================
-  
-  @servers = nil
-  @timeout = 5
+  # == Constants ============================================================
+
+  TIMEOUT_DEFAULT = 5
+  RESOLV_CONF = '/etc/resolv.conf'.freeze
   
   # == Class Methods ========================================================
 
   def self.in_resolv_conf
-    list = [ ]
-    
-    File.open("/etc/resolv.conf") do |fh|
-      list = fh.readlines.collect { |l| l.chomp }.collect { |l| l.sub(/#.*/, '') }
-      
-      list.reject!{ |l| !l.sub!(/^\s*nameserver\s+/, '') }
+    File.open(RESOLV_CONF) do |fh|
+      fh.readlines.map do |l|
+        l.chomp.sub(/#.*/, '')
+      end.reject do |l|
+        !l.sub!(/\A\s*nameserver\s+/, '')
+      end
     end
     
-    list
-
   rescue Errno::ENOENT
     # /etc/resolv.conf may not be present on misconfigured or offline systems
     [ ]
   end
   
   def self.servers
-    @servers ||= in_resolv_conf
+    @servers ||= self.in_resolv_conf
   end
   
   def self.servers=(list)
@@ -36,7 +34,7 @@ class ReDNS::Resolver
   end
   
   def self.timeout
-    @timeout
+    @timeout ||= TIMEOUT_DEFAULT
   end
   
   def self.timeout=(secs)
@@ -97,7 +95,7 @@ class ReDNS::Resolver
   end
   
   def ns_for(name)
-    if (name.match(/^(\d+\.\d+\.\d+)\.\d+$/))
+    if (name.match(/\A(\d+\.\d+\.\d+)\.\d+$/))
       return simple_query(:ns, ReDNS::Support.addr_to_arpa($1))
     end
     
@@ -115,7 +113,12 @@ class ReDNS::Resolver
   def ptr_for_list(name)
     ips = [ ips ].flatten
     
-    bulk_query(:ptr, ips.collect { |ip| ReDNS::Support.addr_to_arpa(ip) })
+    bulk_query(
+      :ptr,
+      ips.map do |ip|
+        ReDNS::Support.addr_to_arpa(ip)
+      end
+    )
   end
 
   def soa_for(name)
@@ -130,12 +133,10 @@ class ReDNS::Resolver
     
     list = bulk_query(:ptr, map.keys)
     
-    list.values.inject({ }) do |h, r|
+    list.values.each_with_object({ }) do |r, h|
       if (ip = map[r.questions[0].name.to_s])
         h[ip] = (r.answers[0] and r.answers[0].rdata.to_s)
       end
-      
-      h
     end
   end
   
@@ -199,7 +200,7 @@ class ReDNS::Resolver
     left = _timeout - Time.now.to_f + start.to_f
 
     while (left > 0)
-      if (ready = IO.select([ @socket ], nil, nil, left))
+      if (ready = IO.select([ @socket ], nil, nil, [ 1.0, left ].min))
         ready[0].each do |socket|
           data = socket.recvfrom(1524)
       

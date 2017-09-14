@@ -4,6 +4,7 @@ $LOAD_PATH << File.expand_path(File.join('..','lib'), File.dirname(__FILE__))
 
 require 'optparse'
 
+require 'eventmachine'
 require 'redns'
 
 # == Main ===================================================================
@@ -30,20 +31,26 @@ queries = op.parse(*ARGV).select do |query|
   end
 end
 
-resolver = ReDNS::Resolver.new do |resolver|
-  if (options[:nameservers])
-    resolver.servers = options[:nameservers]
-  end
-end
-
-queries.each do |query|
-  results = resolver.simple_query(options[:query_type], query)
-  
-  if (results)
-    results.each do |result|
-      puts result.to_s
+EventMachine.run do
+  resolver = ReDNS::Connection.instance do |c|
+    if (options[:nameservers])
+      c.nameservers = options[:nameservers]
     end
-  else
-    puts "No results"
+
+    c.timeout = 2
+  end
+
+  queries.each do |query|
+    resolver.resolve(query, options[:query_type]) do |results|
+      if (results)
+        results.each do |result|
+          puts result.to_s
+        end
+      else
+        puts "No results"
+      end
+
+      EventMachine.stop_event_loop
+    end
   end
 end

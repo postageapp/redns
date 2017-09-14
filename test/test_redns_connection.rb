@@ -89,7 +89,7 @@ class TestReDNSConnection < Test::Unit::TestCase
         c.timeout = nil
       end
       
-      assert_equal ReDNS::Connection::DEFAULT_TIMEOUT, dns.timeout
+      assert_equal ReDNS::Connection::TIMEOUT_DEFAULT, dns.timeout
 
       EventMachine.stop_event_loop
     end
@@ -100,9 +100,20 @@ class TestReDNSConnection < Test::Unit::TestCase
     
     EventMachine.run do
       dns = ReDNS::Connection.instance do |c|
-        c.nameservers += %w[ 127.0.0.2 127.0.0.3 127.0.0.4 127.0.0.5 127.0.0.6 127.0.0.7 127.0.0.8 127.0.0.9  ]
+        c.nameservers = %w[
+          127.0.0.254
+          127.0.0.253
+          127.0.0.252
+          127.0.0.251
+          127.0.0.250
+          127.0.0.249
+          127.0.0.248
+          127.0.0.247
+          127.0.0.246
+          127.0.0.245
+        ] + c.nameservers
         c.timeout = 1
-        c.attempts = 10
+        c.attempts = 20
       end
 
       dns.resolve('example.com') do |result|
@@ -113,6 +124,7 @@ class TestReDNSConnection < Test::Unit::TestCase
     end
     
     assert address
+
     assert_equal '93.184.216.34', address.first.rdata.to_s
   end
 end

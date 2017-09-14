@@ -1,7 +1,13 @@
 require File.expand_path('helper', File.dirname(__FILE__))
 
 class TestReReDNSResolver < Test::Unit::TestCase
-  def test_create
+  def test_in_resolv_conf
+    nameservers = ReDNS::Resolver.in_resolv_conf
+
+    assert nameservers.length >= 1, "No nameservers defined in /etc/resolv.conf"
+  end
+
+  def test_create_defaults
     res = ReDNS::Resolver.new
 
     assert res

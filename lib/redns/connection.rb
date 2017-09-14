@@ -3,8 +3,8 @@ require 'socket'
 class ReDNS::Connection < EventMachine::Connection
   # == Constants ============================================================
   
-  DEFAULT_TIMEOUT = 5
-  DEFAULT_ATTEMPTS = 2
+  TIMEOUT_DEFAULT = 5.0
+  ATTEMPTS_DEFAULT = 5
   SEQUENCE_LIMIT = 0x10000
   
   # == Properties ===========================================================
@@ -37,14 +37,14 @@ class ReDNS::Connection < EventMachine::Connection
   # If the supplied value is zero or nil, will revert to the default.
   def timeout=(value)
     @timeout = value.to_i
-    @timeout = DEFAULT_TIMEOUT if (@timeout == 0)
+    @timeout = TIMEOUT_DEFAULT if (@timeout == 0)
   end
 
   # Sets the current retry attempts parameter to the supplied value.
   # If the supplied value is zero or nil, will revert to the default.
   def attempts=(value)
     @attempts = value.to_i
-    @attempts = DEFAULT_ATTEMPTS if (@attempts == 0)
+    @attempts = ATTEMPTS_DEFAULT if (@attempts == 0)
   end
 
   # Returns the configured list of nameservers as an Array. If not configured
@@ -62,7 +62,7 @@ class ReDNS::Connection < EventMachine::Connection
     @nameservers = nil if (list.empty?)
   end
   
-  # Picks a random nameserver from the configured list=
+  # Picks a random nameserver from the configured list.
   def random_nameserver
     nameservers[rand(nameservers.length)]
   end
@@ -118,8 +118,8 @@ class ReDNS::Connection < EventMachine::Connection
     # Callback tracking is done by matching response IDs in a lookup table
     @callback = { }
     
-    @timeout ||= DEFAULT_TIMEOUT
-    @attempts ||= DEFAULT_ATTEMPTS
+    @timeout ||= TIMEOUT_DEFAULT
+    @attempts ||= ATTEMPTS_DEFAULT
     
     EventMachine.add_periodic_timer(1) do
       check_for_timeouts!
@@ -155,7 +155,7 @@ protected
   # Checks all pending queries for timeouts and triggers callbacks or retries
   # if necessary.
   def check_for_timeouts!
-    timeout_at = Time.now - (@timeout || DEFAULT_TIMEOUT)
+    timeout_at = Time.now - (@timeout || TIMEOUT_DEFAULT)
   
     @callback.keys.each do |k|
       if (params = @callback[k])
