@@ -59,13 +59,16 @@ class ReDNS::Name < ReDNS::Fragment
     pointer_count = 0
 
     while (c = buffer.unpack('C')[0])
+      p({name: self.name})
       if (c & 0xC0 == 0xC0)
         # This is part of a pointer to another section, so advance to that
         # point and read from there, but preserve the position where the
         # pointer was found to leave the buffer in that final state.
 
+        p [ c.to_s(16), buffer ]
+
         if (additional_offset = buffer.unpack('C')[0])
-          pointer = (c & 0x3F << 8) | additional_offset
+          pointer = c & 0x3F << 8 | additional_offset
 
           return_to_offset ||= buffer.offset
           buffer.rewind
@@ -86,6 +89,7 @@ class ReDNS::Name < ReDNS::Fragment
       elsif (c == 0)
         break
       else
+        p({read: c})
         if (read = buffer.read(c))
           name << read
           name << '.'
@@ -100,7 +104,9 @@ class ReDNS::Name < ReDNS::Fragment
       buffer.advance(return_to_offset)
     end
 
-    self.name.encode!('UTF-8')
+    p self.name
+
+    self.name.encode!('UTF-8')#, undef: :replace, invalid: :replace)
     
     self
   end

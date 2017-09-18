@@ -13,4 +13,12 @@ require 'eventmachine'
 require 'redns'
 
 class Test::Unit::TestCase
+  def example_buffer(name)
+    ReDNS::Buffer.new(
+      File.open(
+        File.expand_path("examples/#{name}", File.dirname(__FILE__)),
+        'r:BINARY'
+      ).read
+    )
+  end
 end

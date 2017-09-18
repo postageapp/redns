@@ -94,6 +94,24 @@ class TestReDNSConnection < Test::Unit::TestCase
       EventMachine.stop_event_loop
     end
   end
+
+  def test_broken_ns
+    address = :fail
+
+    EventMachine.run do
+      dns = ReDNS::Connection.instance do |c|
+        c.nameservers = '129.1.1.1'
+      end
+
+      dns.resolve('example.com') do |result|
+        address = result
+
+        EventMachine.stop_event_loop
+      end
+    end
+
+    assert_nil address
+  end
   
   def test_simple_attempts
     address = :fail

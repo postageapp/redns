@@ -3,8 +3,8 @@ require 'socket'
 class ReDNS::Connection < EventMachine::Connection
   # == Constants ============================================================
   
-  TIMEOUT_DEFAULT = 5.0
-  ATTEMPTS_DEFAULT = 5
+  TIMEOUT_DEFAULT = 2.5
+  ATTEMPTS_DEFAULT = 10
   SEQUENCE_LIMIT = 0x10000
   
   # == Properties ===========================================================
@@ -54,6 +54,10 @@ class ReDNS::Connection < EventMachine::Connection
     @nameservers ||= ReDNS::Support.default_nameservers
   end
 
+  def nameserver_score
+    @nameserver_score ||= Hash.new(0)
+  end
+
   # Configure the nameservers to use. Supplied value can be either a string
   # containing one IP address, an Array containing multiple IP addresses, or
   # nil which reverts to defaults.
@@ -64,7 +68,7 @@ class ReDNS::Connection < EventMachine::Connection
   
   # Picks a random nameserver from the configured list.
   def random_nameserver
-    nameservers[rand(nameservers.length)]
+    nameservers.sample
   end
 
   # Returns the current port in use.
@@ -83,28 +87,26 @@ class ReDNS::Connection < EventMachine::Connection
     end
     
     serialized_message = message.serialize.to_s
-    target_nameserver = random_nameserver
 
-    result = send_datagram(
-      serialized_message,
-      target_nameserver,
-      ReDNS::Support.dns_port
-    )
+    nameservers = self.nameservers_by_score
 
-    if (result > 0)
-      @callback[@sequence] = {
-        serialized_message: serialized_message,
-        type: type,
-        filter_by_type: (type == :any || !filter) ? false : type,
-        nameserver: target_nameserver,
-        attempts: self.attempts - 1,
-        callback: callback,
-        at: Time.now
-      }
-    else
-      callback.call(nil)
-    end
+    entry = @callback[@sequence] = {
+      id: @sequence,
+      serialized_message: serialized_message,
+      type: type,
+      filter_by_type: (type == :any || !filter) ? false : type,
+      nameservers: nameservers,
+      nameserver: nameservers.pop,
+      attempts: self.attempts,
+      callback: callback,
+      at: Time.now
+    }
 
+    p entry
+
+    send_request!(entry)
+
+  ensure
     @sequence += 1
     @sequence %= SEQUENCE_LIMIT
   end
@@ -124,13 +126,30 @@ class ReDNS::Connection < EventMachine::Connection
     EventMachine.add_periodic_timer(1) do
       check_for_timeouts!
     end
+
+    EventMachine.add_periodic_timer(30) do
+      update_nameserver_scores!
+    end
+  end
+
+  def peer_addr
+    Socket.unpack_sockaddr_in(self.get_peername)
   end
 
   # EventMachine: Called when data is received on the active socket.
   def receive_data(data)
+    p '<<<<'
+    p data
+
     message = ReDNS::Message.new(ReDNS::Buffer.new(data))
     
     if (callback = @callback.delete(message.id))
+      puts "DNS <- %s" % [ callback[:id] ]
+
+      port, ip = self.peer_addr
+
+      self.nameserver_score[ip] += 1
+
       answers = message.answers
 
       if (type = callback[:filter_by_type])
@@ -146,10 +165,37 @@ class ReDNS::Connection < EventMachine::Connection
   end
 
 protected
-  # Returns the next nameserver in the list for a given entry, wrapping around
-  # to the beginning if required.
-  def nameserver_after(nameserver)
-    self.nameservers[(self.nameservers.index(nameserver).to_i + 1) % self.nameservers.length]
+  def nameservers_by_score
+    self.nameservers.sort_by do |nameserver|
+      self.nameserver_score[nameserver]
+    end
+  end
+
+  def send_request!(params)
+    puts 'DNS -> %s %s (#%d)' % [ params[:id], params[:nameserver], params[:attempts] ]
+
+    rv = send_datagram(
+      params[:serialized_message],
+      params[:nameserver],
+      ReDNS::Support.dns_port
+    )
+
+    # A non-positive result means there was some kind of error.
+    params[:retry] = rv <= 0
+
+  rescue EventMachine::ConnectionError
+    # This is thrown if an invalid address is configured in the nameservers.
+    params[:retry] = true
+  ensure
+    params[:attempts] -= 1
+  end
+
+  def update_nameserver_scores!
+    # Sorts nameservers by least to most timeouts, also shaves number of
+    # timeouts in half to ignore temporary problems.
+    self.nameservers.each do |nameserver|
+      self.nameserver_score[nameserver] /= 2
+    end
   end
 
   # Checks all pending queries for timeouts and triggers callbacks or retries
@@ -157,31 +203,36 @@ protected
   def check_for_timeouts!
     timeout_at = Time.now - (@timeout || TIMEOUT_DEFAULT)
   
+    # Iterate over a copy of the keys to avoid issues with deleting entries
+    # from a Hash being iterated.
     @callback.keys.each do |k|
-      if (params = @callback[k])
-        if (params[:at] < timeout_at)
-          if (params[:attempts] > 0)
-            # If this request can be retried, find a different nameserver.
-            target_nameserver = nameserver_after(params[:target_nameserver])
-            
-            # Send exactly the same request to it so that the request ID will
-            # match to the same callback.
-            send_datagram(
-              params[:serialized_message],
-              target_nameserver,
-              ReDNS::Support.dns_port
-            )
-            
-            params[:target_nameserver] = target_nameserver
-            params[:attempts] -= 1
-          else
-            params[:callback].call(nil)
-            @callback.delete(k)
-          end
-        end
-      else
+      params = @callback[k]
+
+      unless (params)
         # Was missing params so should be deleted if not already removed.
         @callback.delete(k)
+      end
+
+      if (params[:at] < timeout_at or params[:retry])
+        nameserver_score[params[:nameserver]] -= 1
+
+        if (params[:attempts] > 0)
+          if (params[:nameservers].empty?)
+            params[:nameservers] = self.nameservers_by_score
+          end
+
+          # If this request can be retried, find a different nameserver.
+          params[:nameserver] = params[:nameservers].pop
+
+          # Send exactly the same request to it so that the request ID will
+          # match to the same callback. The first successful response is
+          # considered valid.
+          send_request!(params)
+        else
+          params[:callback].call(nil)
+
+          @callback.delete(k)
+        end
       end
     end
   end
