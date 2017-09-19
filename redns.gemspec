@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib".freeze]
   s.authors = ["tadman".freeze]
-  s.date = "2017-09-14"
+  s.date = "2017-09-19"
   s.description = "ReDNS is a pure Ruby DNS library with drivers for reactor-model engines such as EventMachine".freeze
   s.email = "github@tadman.ca".freeze
   s.executables = ["redig".freeze]
@@ -46,6 +46,8 @@ Gem::Specification.new do |s|
     "lib/redns/resource.rb",
     "lib/redns/support.rb",
     "redns.gemspec",
+    "test/examples/aspmx4.googlemail.com",
+    "test/examples/postageapp.com.mx",
     "test/helper.rb",
     "test/test_redns.rb",
     "test/test_redns_address.rb",
