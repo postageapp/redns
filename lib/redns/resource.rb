@@ -52,7 +52,6 @@ class ReDNS::Resource < ReDNS::Fragment
   end
   
   def deserialize(buffer)
-    p({ name: buffer })
     self.name = ReDNS::Name.new(buffer)
 
     raw = buffer.unpack("nnNn")

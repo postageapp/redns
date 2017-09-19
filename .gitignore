@@ -15,3 +15,5 @@ rdoc
 pkg
 
 /Gemfile.lock
+
+/tmp

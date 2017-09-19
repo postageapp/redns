@@ -172,9 +172,8 @@ class TestReDNSMessage < Test::Unit::TestCase
   def test_decode_example
     message = ReDNS::Message.new(example_buffer('postageapp.com.mx'))
 
-    puts message.to_s
-
-    assert_equal 'aspmx4.googlemail.com', message.answers[0].rdata
-
+    message.answers.each do |answer|
+      assert_equal 'UTF-8', answer.rdata.to_a[0].encoding.to_s
+    end
   end
 end

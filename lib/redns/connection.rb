@@ -102,8 +102,6 @@ class ReDNS::Connection < EventMachine::Connection
       at: Time.now
     }
 
-    p entry
-
     send_request!(entry)
 
   ensure
@@ -138,15 +136,10 @@ class ReDNS::Connection < EventMachine::Connection
 
   # EventMachine: Called when data is received on the active socket.
   def receive_data(data)
-    p '<<<<'
-    p data
-
     message = ReDNS::Message.new(ReDNS::Buffer.new(data))
     
     if (callback = @callback.delete(message.id))
-      puts "DNS <- %s" % [ callback[:id] ]
-
-      port, ip = self.peer_addr
+      _, ip = self.peer_addr
 
       self.nameserver_score[ip] += 1
 
@@ -172,8 +165,6 @@ protected
   end
 
   def send_request!(params)
-    puts 'DNS -> %s %s (#%d)' % [ params[:id], params[:nameserver], params[:attempts] ]
-
     rv = send_datagram(
       params[:serialized_message],
       params[:nameserver],
