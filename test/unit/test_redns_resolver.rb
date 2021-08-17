@@ -52,8 +52,12 @@ class TestReReDNSResolver < Test::Unit::TestCase
 
     assert_equal 2, r.size
 
-    assert_equal :txt, r[0].rtype
-    assert_equal 'v=spf1 redirect=_spf.google.com', r[0].rdata.to_s
+    spf = r.find do |res|
+      res.rdata.to_s.match(/\Av=spf/)
+    end
+
+    assert_equal :txt, spf.rtype
+    assert_equal 'v=spf1 redirect=_spf.google.com', spf.rdata.to_s
   end
 
   def test_query
@@ -168,7 +172,7 @@ class TestReReDNSResolver < Test::Unit::TestCase
   def test_truncation
     res = ReDNS::Resolver.new
 
-    r = res.simple_query('truncated.rfc5322.net', :txt)
+    r = res.simple_query(:txt, 'truncated.rfc5322.net')
 
     p r
   end

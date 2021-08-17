@@ -222,7 +222,6 @@ class ReDNS::Resolver
 
 protected
   def expand_answers(r)
-
     unless (r and r.answers)
       return nil
     end

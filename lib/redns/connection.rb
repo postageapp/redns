@@ -2,13 +2,13 @@ require 'socket'
 
 class ReDNS::Connection < EventMachine::Connection
   # == Constants ============================================================
-  
+
   TIMEOUT_DEFAULT = 2.5
   ATTEMPTS_DEFAULT = 10
   SEQUENCE_LIMIT = 0x10000
-  
+
   # == Properties ===========================================================
-  
+
   attr_reader :timeout, :attempts
 
   # == Extensions ===========================================================
@@ -19,20 +19,35 @@ class ReDNS::Connection < EventMachine::Connection
 
   # Returns a new instance of a reactor-bound resolver. If a block is given,
   # the instance is supplied for customization purposes.
-  def self.instance
-    connection = EventMachine.open_datagram_socket(
-      ReDNS::Support.bind_all_addr,
-      0,
-      self
-    )
-    
-    yield(connection) if (block_given?)
-    
-    connection
+  def self.instance(protocol = :udp, nameservers = nil)
+    nameservers ||= ReDNS::Support.default_nameservers
+
+    case (protocol)
+    when :tcp
+      connection = EventMachine.connect(
+        nameservers.first,
+        53,
+        self
+      )
+
+      yield(connection) if (block_given?)
+
+      connection
+    else
+      connection = EventMachine.open_datagram_socket(
+        ReDNS::Support.bind_all_addr,
+        0,
+        self
+      )
+
+      yield(connection) if (block_given?)
+
+      connection
+    end
   end
 
   # == Instance Methods =====================================================
-  
+
   # Sets the current timeout parameter to the supplied value (in seconds).
   # If the supplied value is zero or nil, will revert to the default.
   def timeout=(value)
@@ -65,7 +80,7 @@ class ReDNS::Connection < EventMachine::Connection
     @nameservers = list.flatten.compact
     @nameservers = nil if (list.empty?)
   end
-  
+
   # Picks a random nameserver from the configured list.
   def random_nameserver
     nameservers.sample
@@ -75,7 +90,7 @@ class ReDNS::Connection < EventMachine::Connection
   def port
     Socket.unpack_sockaddr_in(get_sockname)[0]
   end
-  
+
   # Resolves a given query and optional type asynchronously, yielding to the
   # callback function with either the answers or nil if a timeout or error
   # occurred. The filter option will restrict responses ot those matching
@@ -85,7 +100,7 @@ class ReDNS::Connection < EventMachine::Connection
     message = ReDNS::Message.question(query, type) do |m|
       m.id = @sequence
     end
-    
+
     serialized_message = message.serialize.to_s
 
     nameservers = self.nameservers_by_score
@@ -114,13 +129,13 @@ class ReDNS::Connection < EventMachine::Connection
     # Sequence numbers do not have to be cryptographically secure, but having
     # a healthy amount of randomness is a good thing.
     @sequence = (rand(SEQUENCE_LIMIT) ^ (object_id ^ (Time.now.to_f * SEQUENCE_LIMIT).to_i)) % SEQUENCE_LIMIT
-    
+
     # Callback tracking is done by matching response IDs in a lookup table
     @callback = { }
-    
+
     @timeout ||= TIMEOUT_DEFAULT
     @attempts ||= ATTEMPTS_DEFAULT
-    
+
     EventMachine.add_periodic_timer(1) do
       check_for_timeouts!
     end
@@ -137,7 +152,7 @@ class ReDNS::Connection < EventMachine::Connection
   # EventMachine: Called when data is received on the active socket.
   def receive_data(data)
     message = ReDNS::Message.new(ReDNS::Buffer.new(data))
-    
+
     if (callback = @callback.delete(message.id))
       _, ip = self.peer_addr
 
@@ -152,7 +167,7 @@ class ReDNS::Connection < EventMachine::Connection
       callback[:callback].call(answers)
     end
   end
-  
+
   # EventMachine: Called when the connection is closed.
   def unbind
   end
@@ -193,7 +208,7 @@ protected
   # if necessary.
   def check_for_timeouts!
     timeout_at = Time.now - (@timeout || TIMEOUT_DEFAULT)
-  
+
     # Iterate over a copy of the keys to avoid issues with deleting entries
     # from a Hash being iterated.
     @callback.keys.each do |k|
