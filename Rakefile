@@ -10,7 +10,7 @@ begin
     gem.summary = %Q{Ruby Reactor-Ready DNS Library}
     gem.description = %Q{ReDNS is a pure Ruby DNS library with drivers for reactor-model engines such as EventMachine}
     gem.email = "github@tadman.ca"
-    gem.homepage = "http://github.com/tadman/redns"
+    gem.homepage = "https://github.com/postageapp/redns"
     gem.authors = %w[ tadman ]
   end
   Jeweler::GemcutterTasks.new
