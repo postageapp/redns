@@ -1,4 +1,4 @@
-require File.expand_path('helper', File.dirname(__FILE__))
+require_relative '../helper'
 
 class TestReReDNSResolver < Test::Unit::TestCase
   def test_in_resolv_conf
@@ -27,7 +27,7 @@ class TestReReDNSResolver < Test::Unit::TestCase
     res = ReDNS::Resolver.new
 
     r = res.simple_query(:a, 'example.com')
-    
+
     assert_equal 1, r.size
 
     assert_equal :a, r[0].rtype
@@ -38,7 +38,7 @@ class TestReReDNSResolver < Test::Unit::TestCase
     res = ReDNS::Resolver.new
 
     r = res.simple_query(:ptr, '10.32.0.192.in-addr.arpa')
-    
+
     assert_equal 1, r.size
 
     assert_equal :ptr, r[0].rtype
@@ -49,8 +49,8 @@ class TestReReDNSResolver < Test::Unit::TestCase
     res = ReDNS::Resolver.new
 
     r = res.simple_query(:txt, 'gmail.com')
-    
-    assert_equal 1, r.size
+
+    assert_equal 2, r.size
 
     assert_equal :txt, r[0].rtype
     assert_equal 'v=spf1 redirect=_spf.google.com', r[0].rdata.to_s
@@ -74,7 +74,7 @@ class TestReReDNSResolver < Test::Unit::TestCase
 
   def test_ns_query
     res = ReDNS::Resolver.new
-    
+
     assert !res.servers.empty?
 
     r = res.query do |q|
@@ -110,18 +110,18 @@ class TestReReDNSResolver < Test::Unit::TestCase
     assert rlist
 
     assert_equal 6, rlist.length
-    
+
     assert_equal addrs.sort, rlist.keys.sort
-    
+
     assert rlist[addrs[0]]
-    
+
     expected =  %w[
       ccnso.icann.org.
       redirects.iana.org.
       tools.iana.org.
-      nomcom.icann.org.
+      test-ry-api.vip.icann.org.
       reports.internic.net.
-      dnscert.com.
+      dnscert.vip.icann.org.
     ]
 
     answers = addrs.collect do |a|
@@ -140,28 +140,36 @@ class TestReReDNSResolver < Test::Unit::TestCase
       192.0.32.15
       192.0.32.16
     ]
-    
+
     res = ReDNS::Resolver.new
 
     rlist = res.reverse_addresses(addrs)
 
     assert rlist
-    
+
     assert_equal addrs.length, rlist.length
 
     expected =  %w[
       ccnso.icann.org.
       redirects.iana.org.
       tools.iana.org.
-      nomcom.icann.org.
+      test-ry-api.vip.icann.org.
       reports.internic.net.
-      dnscert.com.
+      dnscert.vip.icann.org.
     ]
-    
+
     answers = addrs.collect do |a|
       rlist[a]
     end
 
     assert_equal expected, answers
+  end
+
+  def test_truncation
+    res = ReDNS::Resolver.new
+
+    r = res.simple_query('truncated.rfc5322.net', :txt)
+
+    p r
   end
 end

@@ -1,4 +1,4 @@
-require File.expand_path('helper', File.dirname(__FILE__))
+require_relative '../helper'
 
 class TestRedns < Test::Unit::TestCase
   def test_module_loaded
