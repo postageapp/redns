@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'set'
+
 $LOAD_PATH << File.expand_path(File.join('..','lib'), File.dirname(__FILE__))
 
 require 'optparse'
@@ -11,10 +13,11 @@ require 'redns'
 
 options = {
   query_type: :any,
+  nameservers: [ ]
 }
 
 op = OptionParser.new do |op|
-  op.on("-t", "--type=s") do |type|
+  op.on('-t', '--type=s') do |type|
     options[:query_type] = type.to_sym
   end
 end
@@ -22,35 +25,50 @@ end
 # Look for command-line arguments prefixed with '@' and push these into the
 # options for nameservers.
 queries = op.parse(*ARGV).select do |query|
-  case (query)
+  case (query.upcase)
+  when 'TXT','MX','SOA','ANY','A','AAAA','CNAME','PTR'
+    options[:query_type] = query.downcase.to_sym
+    false
   when /^@(.*)/
-    (options[:nameservers] ||= [ ]) << $1
+    options[:nameservers] << $1
     false
   else
     true
   end
 end
 
+if (queries.empty?)
+  $stderr.puts('No queries')
+  exit(0)
+end
+
 EventMachine.run do
   resolver = ReDNS::Connection.instance do |c|
-    if (options[:nameservers])
+    if (options[:nameservers].any?)
       c.nameservers = options[:nameservers]
     end
 
     c.timeout = 2
   end
 
+  pending = Set.new(queries)
+
   queries.each do |query|
     resolver.resolve(query, options[:query_type]) do |results|
       if (results)
+        puts '%s: %d result(s) found' % [ query, results.length ]
         results.each do |result|
           puts result.to_s
         end
       else
-        puts "No results"
+        puts 'No results'
       end
 
-      EventMachine.stop_event_loop
+      pending.delete(query)
+
+      if (pending.empty?)
+        EventMachine.stop_event_loop
+      end
     end
   end
 end
